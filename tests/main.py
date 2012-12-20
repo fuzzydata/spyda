@@ -18,7 +18,7 @@ def runtests():
     cmd = ["py.test", "-r", "fsxX", "--ignore=tmp"]
 
     if importable("pytest_cov"):
-        cmd.append("--cov=circuits")
+        cmd.append("--cov=spyda")
         cmd.append("--cov-report=html")
 
     cmd.append(dirname(abspath(__file__)))
