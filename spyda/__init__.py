@@ -18,10 +18,8 @@ __date__ = "18th December 2012"
 __version__ = "0.0.1dev"
 
 
-from StringIO import StringIO
-
-from lxml import etree
 from restclient import GET
+from lxml.html import fromstring
 
 
 HEADERS = {
@@ -29,10 +27,10 @@ HEADERS = {
 }
 
 
-def fetch(url):
+def fetch_url(url):
     return GET(url, headers=HEADERS, resp=True)
 
 
-def parse(content):
-    parser = etree.HTMLParser()
-    return etree.parse(StringIO(content), parser)
+def get_links(html):
+    dom = fromstring(html)
+    return dom.cssselect("a")
