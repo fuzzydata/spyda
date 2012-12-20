@@ -1,80 +1,47 @@
 # Module:   conftest
-# Date:     6th December 2010
-# Author:   James Mills, prologic at shortcircuit dot net dot au
-import os
+# Date:     20th December 2012
+# Author:   James Mills, j dot mills at griffith dot edu dot au
 
-"""py.test config"""
+"""pytest config"""
 
+from os import path
 from time import sleep
 
-import collections
-
-from circuits import Component, handler
-from circuits.core.manager import TIMEOUT
+import pytest
 
 
-class Flag(object):
-    status = False
+DOCROOT = path.join(path.dirname(__file__), "docroot")
 
 
-def call_event_from_name(manager, event, event_name, *channels):
-    fired = False
-    value = None
-    for r in manager.waitEvent(event_name):
-        if not fired:
-            fired = True
-            value = manager.fire(event, *channels)
-        sleep(0.1)
-    return value
+@pytest.fixture(scope="session")
+def webapp(request):
+    from circuits import Component
+    from circuits.net.sockets import Close
+    from circuits.web import Controller, Server, Static
 
+    class Root(Controller):
 
-def call_event(manager, event, *channels):
-    return call_event_from_name(manager, event, event.name, *channels)
+        def hello(self):
+            return "Hello World!"
 
+    class WebApp(Component):
 
-class WaitEvent(object):
-    def __init__(self, manager, name, channel=None, timeout=3.0):
-        if channel is None:
-            channel = getattr(manager, "channel", None)
+        def init(self, docroot):
+            self.docroot = docroot
 
-        self.timeout = timeout
-        self.manager = manager
+            self.server = Server(0).register(self)
+            Root().register(self)
+            Static(docroot=self.docroot).register(self)
 
-        flag = Flag()
+    webapp = WebApp(DOCROOT)
 
-        @handler(name, channel=channel)
-        def on_event(self, *args, **kwargs):
-            flag.status = True
+    webapp.start()
+    sleep(1)  # Give circuits.web time to startup
 
-        self.manager.addHandler(on_event)
-        self.flag = flag
-        self.handler = on_event
+    def finalizer():
+        webapp.fire(Close(), webapp.server)
+        webapp.stop()
 
-    def wait(self):
-        try:
-            for i in range(int(self.timeout / TIMEOUT)):
-                if self.flag.status:
-                    return True
-                sleep(TIMEOUT)
-        finally:
-            self.manager.removeHandler(self.handler)
+    request.addfinalizer(finalizer)
 
-
-def wait_for(obj, attr, value=True, timeout=3.0):
-    from circuits.core.manager import TIMEOUT
-    for i in range(int(timeout / TIMEOUT)):
-        if isinstance(value, collections.Callable):
-            if value(obj, attr):
-                return True
-        elif getattr(obj, attr) == value:
-            return True
-        sleep(TIMEOUT)
-
-
-def pytest_namespace():
-    return dict((
-        ("WaitEvent", WaitEvent),
-        ("wait_for", wait_for),
-        ("call_event", call_event),
-        ("call_event_from_name", call_event_from_name),
-    ))
+    return webapp
