@@ -27,6 +27,11 @@ HEADERS = {
 }
 
 
+def crawler(url, **kwargs):
+    from . crawler import Crawler
+    return Crawler(url, **kwargs)
+
+
 def fetch_url(url):
     return GET(url, headers=HEADERS, resp=True)
 
@@ -34,3 +39,6 @@ def fetch_url(url):
 def get_links(html):
     dom = fromstring(html)
     return dom.cssselect("a")
+
+
+__all__ = ("crawler", "fetch_url", "get_links",)
