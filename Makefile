@@ -13,6 +13,7 @@ clean:
 	@find . -name '*.pyc' -delete
 	@find . -name '*.pyo' -delete
 	@find . -name '*~' -delete
+	@find . -name "__pycache__" -delete
 
 docs:
 	@make -C docs clean html
