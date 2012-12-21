@@ -1,5 +1,6 @@
 [run]
-omit = tests/*
+omit = spyda/main.py
+       tests/*
 
 [html]
 directory = coverage
