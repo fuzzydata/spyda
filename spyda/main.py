@@ -4,7 +4,7 @@
 
 from optparse import OptionParser
 
-from . import crawler
+from . import crawl
 from . import __version__
 
 USAGE = "%prog [options] <url>"
@@ -13,12 +13,6 @@ VERSION = "%prog v" + __version__
 
 def parse_options():
     parser = OptionParser(usage=USAGE, version=VERSION)
-
-    parser.add_option(
-        "", "--maxdepth",
-        action="store", type="int", default=0, dest="maxdepth",
-        help="Maximum depth to traverse"
-    )
 
     opts, args = parser.parse_args()
 
@@ -34,7 +28,7 @@ def main():
 
     url = args[0]
 
-    print("\n".join(crawler(url, maxdepth=opts.maxdepth)()))
+    print("\n".join(map(lambda x: x[1], crawl(url))))
 
 
 if __name__ == "__main__":
