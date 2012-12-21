@@ -14,6 +14,18 @@ VERSION = "%prog v" + __version__
 def parse_options():
     parser = OptionParser(usage=USAGE, version=VERSION)
 
+    parser.add_option(
+        "-a", "--allowed_domain",
+        action="append", default=None, dest="allowed_domains",
+        help="Allowed domain to traverse (multiple allowed)."
+    )
+
+    parser.add_option(
+        "-v", "--verbose",
+        action="store_true", default=False, dest="verbose",
+        help="Enable verbose logging"
+    )
+
     opts, args = parser.parse_args()
 
     if len(args) < 1:
@@ -28,7 +40,7 @@ def main():
 
     url = args[0]
 
-    print("\n".join(map(lambda x: x[1], crawl(url))))
+    print("\n".join(map(lambda x: x[1], crawl(url, allowed_domains=opts.allowed_domains, verbose=opts.verbose))))
 
 
 if __name__ == "__main__":
