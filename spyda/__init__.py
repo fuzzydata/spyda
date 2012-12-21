@@ -62,7 +62,7 @@ def crawl(url, allowed_domains=None):
         visited.append(url)
 
         response, content = fetch_url(url)
-        links = takewhile(lambda link: link not in visited, (link.get("href") for link in get_links(content)))
+        links = takewhile(lambda link: link is not None and link not in visited, (link.get("href") for link in get_links(content)))
 
         for link in links:
             url, absurl = parse_url(link), root.relative(link)
