@@ -1,5 +1,8 @@
+from urlparse import urljoin
+
 from py import path
 
+from spyda import fetch_url
 from spyda import get_links
 
 
@@ -14,6 +17,12 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize(["s", "expected_links"], tests)
 
 
-def test(s, expected_links):
+def test__fetch_url(webapp):
+    res, data = fetch_url(urljoin(webapp.server.base, "hello"))
+    assert res.status == 200
+    assert data == "Hello World!"
+
+
+def test__get_links(s, expected_links):
     actual_links = [element.get("href") for element in get_links(s)]
     assert actual_links == expected_links
