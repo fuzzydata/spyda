@@ -39,7 +39,7 @@ def get_links(html):
     return dom.cssselect("a")
 
 
-def crawl(url, allowed_domains=None):
+def crawl(url, allowed_domains=None, verbose=False):
     """Crawl a given url recursively for urls.
 
     :param url: URL to start crawling from.
@@ -48,30 +48,47 @@ def crawl(url, allowed_domains=None):
     :param allowed_domains: A list of allowed domains to traverse. If evaluates to ``False``, allows all domains.
                             By default the domain of the starting URL above is added to the list.
     :type  allowed_domains: list or None or False
+
+    :param verbose: If ``True`` will print verbose logging
+    :param verbose: bool
     """
+
+    def log(msg, *args):
+        if verbose:
+            print(msg.format(*args))
+
+    log("Crawling {0}", url)
 
     root = parse_url(url)
     queue = deque([url])
-    visited = []
+    visited = set()
 
     if allowed_domains:
         allowed_domains.append(root._host)
 
     while queue:
         url = queue.popleft()
-        visited.append(url)
+        visited.add(url)
 
         response, content = fetch_url(url)
-        links = takewhile(lambda link: link is not None and link not in visited, (link.get("href") for link in get_links(content)))
+        log(" Followed: {0}", url)
+        log("  Status:  {0}", response.status)
+
+        links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
+        log("  Links:   {0}", len(links))
 
         for link in links:
             url, absurl = parse_url(link), root.relative(link)
+
+            if absurl.utf8() in visited:
+                continue
 
             if allowed_domains and absurl._host not in allowed_domains:
                 continue
 
             queue.append(absurl.utf8())
 
+            log("  {0}", link)
             yield url.utf8(), absurl.utf8()
 
 __all__ = ("crawl", "fetch_url", "get_links",)
