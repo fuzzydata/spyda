@@ -1,11 +1,12 @@
+#!/usr/bin/env python
+
+import pytest
+
 from urlparse import urljoin
 
 from py import path
-import pytest
 
-from spyda import fetch_url
-from spyda import get_links
-from spyda import crawl
+from spyda import crawl, fetch_url, get_links
 
 
 def pytest_generate_tests(metafunc):
