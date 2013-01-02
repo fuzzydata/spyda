@@ -21,6 +21,12 @@ def parse_options():
     )
 
     parser.add_option(
+        "-d", "--max_depth",
+        action="store", type=int, default=0, dest="max_depth",
+        help="Maximum depth to follow (0 for unlimited)"
+    )
+
+    parser.add_option(
         "-v", "--verbose",
         action="store_true", default=False, dest="verbose",
         help="Enable verbose logging"
@@ -40,7 +46,7 @@ def main():
 
     url = args[0]
 
-    print("\n".join(map(lambda x: x[1], crawl(url, allowed_domains=opts.allowed_domains, verbose=opts.verbose))))
+    print("\n".join(map(lambda x: x[1], crawl(url, allowed_domains=opts.allowed_domains, max_depth=opts.max_depth, verbose=opts.verbose))))
 
 
 if __name__ == "__main__":

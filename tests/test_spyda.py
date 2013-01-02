@@ -50,6 +50,10 @@ def test_crawl_allowed_domains(webapp):
     assert not set(map(lambda x: x[0], crawl(urljoin(webapp.server.base, "external"), allowed_domains=["localhost"])))
 
 
+def test_crawl_max_depth(webapp):
+    assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], max_depth=1))) == set(["foo/"])
+
+
 def test_crawl_verbose(webapp, expected_links, capsys):
     assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], verbose=True))) == set(expected_links)
 

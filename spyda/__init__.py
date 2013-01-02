@@ -38,7 +38,7 @@ def get_links(html):
     return dom.cssselect("a")
 
 
-def crawl(root_url, allowed_domains=None, verbose=False):
+def crawl(root_url, allowed_domains=None, max_depth=0, verbose=False):
     """Crawl a given url recursively for urls.
 
     :param root_url: Root URL to start crawling from.
@@ -47,6 +47,9 @@ def crawl(root_url, allowed_domains=None, verbose=False):
     :param allowed_domains: A list of allowed domains to traverse. If evaluates to ``False``, allows all domains.
                             By default the domain of the starting URL above is added to the list.
     :type  allowed_domains: list or None or False
+
+    :param max_depth: Maximum depth to follow, 0 for unlimited depth.
+    :param max_depth: int
 
     :param verbose: If ``True`` will print verbose logging
     :param verbose: bool
@@ -59,6 +62,7 @@ def crawl(root_url, allowed_domains=None, verbose=False):
     root_url = parse_url(root_url)
     queue = deque([root_url])
     visited = set()
+    n = 0
 
     if allowed_domains:
         allowed_domains.append(root_url._host)
@@ -66,6 +70,10 @@ def crawl(root_url, allowed_domains=None, verbose=False):
     log("Crawling {0}", root_url.utf8())
 
     while queue:
+        if max_depth and n >= max_depth:
+            return
+
+        n += 1
         current_url = queue.popleft()
         visited.add(current_url.utf8())
 
