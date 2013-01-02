@@ -19,7 +19,6 @@ __version__ = "0.0.1dev"
 
 
 from collections import deque
-from itertools import takewhile
 
 from restclient import GET
 from lxml.html import fromstring
@@ -39,11 +38,11 @@ def get_links(html):
     return dom.cssselect("a")
 
 
-def crawl(url, allowed_domains=None, verbose=False):
+def crawl(root_url, allowed_domains=None, verbose=False):
     """Crawl a given url recursively for urls.
 
-    :param url: URL to start crawling from.
-    :type  url: str
+    :param root_url: Root URL to start crawling from.
+    :type  root_url: str
 
     :param allowed_domains: A list of allowed domains to traverse. If evaluates to ``False``, allows all domains.
                             By default the domain of the starting URL above is added to the list.
@@ -57,28 +56,28 @@ def crawl(url, allowed_domains=None, verbose=False):
         if verbose:
             print(msg.format(*args))
 
-    log("Crawling {0}", url)
-
-    root = parse_url(url)
-    queue = deque([url])
+    root_url = parse_url(root_url)
+    queue = deque([root_url])
     visited = set()
 
     if allowed_domains:
-        allowed_domains.append(root._host)
+        allowed_domains.append(root_url._host)
+
+    log("Crawling {0}", root_url.utf8())
 
     while queue:
-        url = queue.popleft()
-        visited.add(url)
+        current_url = queue.popleft()
+        visited.add(current_url.utf8())
 
-        response, content = fetch_url(url)
-        log(" Followed: {0}", url)
+        response, content = fetch_url(current_url.utf8())
+        log(" Followed: {0}", current_url.utf8())
         log("  Status:  {0}", response.status)
 
         links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
         log("  Links:   {0}", len(links))
 
         for link in links:
-            url, absurl = parse_url(link), root.relative(link)
+            url, absurl = parse_url(link), current_url.relative(link)
 
             if absurl.utf8() in visited:
                 continue
@@ -86,7 +85,7 @@ def crawl(url, allowed_domains=None, verbose=False):
             if allowed_domains and absurl._host not in allowed_domains:
                 continue
 
-            queue.append(absurl.utf8())
+            queue.append(absurl)
 
             log("  {0}", link)
             yield url.utf8(), absurl.utf8()

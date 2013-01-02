@@ -37,6 +37,8 @@ def test_fetch_url(webapp):
 
 def test_get_links(s, expected_links):
     actual_links = [element.get("href") for element in get_links(s)]
+    actual_links.remove(".")
+    actual_links.remove("..")
     assert actual_links == expected_links
 
 
@@ -48,18 +50,18 @@ def test_crawl_verbose(webapp, expected_links, capsys):
     assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], verbose=True))) == set(expected_links)
 
     verbose_output = """\
-Crawling {base_url:s}
- Followed: {base_url:s}
+Crawling {base_url:s}/
+ Followed: {base_url:s}/
   Status:  200
-  Links:   1
+  Links:   3
   foo/
  Followed: {base_url:s}/foo/
   Status:  200
-  Links:   1
+  Links:   3
   bar/
- Followed: {base_url:s}/bar/
-  Status:  404
-  Links:   1
+ Followed: {base_url:s}/foo/bar/
+  Status:  200
+  Links:   2
 """.format(base_url=webapp.server.base)
 
     out, err = capsys.readouterr()
