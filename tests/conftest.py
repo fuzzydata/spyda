@@ -45,6 +45,9 @@ class Root(Controller):
     def hello(self):
         return "Hello World!"
 
+    def external(self):
+        return "<a href=\"http://www.google.com\">Google</a>"
+
 
 class WebApp(Component):
 
