@@ -54,6 +54,10 @@ def test_crawl_max_depth(webapp):
     assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], max_depth=1))) == set(["foo/"])
 
 
+def test_crawl_patterns(webapp):
+    assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], patterns=["^.*\/foo\/$"]))) == set(["foo/"])
+
+
 def test_crawl_verbose(webapp, expected_links, capsys):
     assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], verbose=True))) == set(expected_links)
 
@@ -62,14 +66,20 @@ Crawling {base_url:s}/
  Followed: {base_url:s}/
   Status:  200
   Links:   3
-  foo/
+  (V): {base_url:s}/
+  (V): {base_url:s}/
+  (F): {base_url:s}/foo/
  Followed: {base_url:s}/foo/
   Status:  200
   Links:   3
-  bar/
+  (V): {base_url:s}/foo/
+  (V): {base_url:s}/
+  (F): {base_url:s}/foo/bar/
  Followed: {base_url:s}/foo/bar/
   Status:  200
   Links:   2
+  (V): {base_url:s}/foo/bar/
+  (V): {base_url:s}/foo/
 """.format(base_url=webapp.server.base)
 
     out, err = capsys.readouterr()

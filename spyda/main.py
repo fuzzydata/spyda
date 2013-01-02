@@ -2,6 +2,7 @@
 
 """Web Crawler Tool"""
 
+from operator import itemgetter
 from optparse import OptionParser
 
 from . import crawl
@@ -27,6 +28,12 @@ def parse_options():
     )
 
     parser.add_option(
+        "-p", "--pattern",
+        action="append", default=None, dest="patterns",
+        help="URL pattern to match (multiple allowed)."
+    )
+
+    parser.add_option(
         "-v", "--verbose",
         action="store_true", default=False, dest="verbose",
         help="Enable verbose logging"
@@ -46,7 +53,20 @@ def main():
 
     url = args[0]
 
-    print("\n".join(map(lambda x: x[1], crawl(url, allowed_domains=opts.allowed_domains, max_depth=opts.max_depth, verbose=opts.verbose))))
+    print(
+        "\n".join(
+            map(
+                itemgetter(1),
+                crawl(
+                    url,
+                    allowed_domains=opts.allowed_domains,
+                    max_depth=opts.max_depth,
+                    patterns=opts.patterns,
+                    verbose=opts.verbose
+                )
+            )
+        )
+    )
 
 
 if __name__ == "__main__":
