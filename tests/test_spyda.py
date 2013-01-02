@@ -9,16 +9,54 @@ from py import path
 from spyda import crawl, fetch_url, get_links
 
 
-def pytest_generate_tests(metafunc):
-    if metafunc.fixturenames == ["s", "expected_links"]:
-        tests = []
-        for p in path.local(__file__).dirpath().visit(fil="*.html", rec=True):
-            s = p.read()
-            expected_links = [link for link in p.new(basename="links.txt").readlines(False) if link]
-            args = (s, expected_links,)
-            tests.append(args)
+SAMPLE_CONTENT = """\
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-        metafunc.parametrize(["s", "expected_links"], tests)
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+ <title>/</title>
+</head>
+
+<body>
+ <p>Hello World!</p>
+ <p><a href=".">.</a></p>
+ <p><a href="..">..</a></p>
+ <p><a href="foo/">foo/</a></p>
+ <p>Test suite created by <a href="mailto:j.mills@griffith.edu.au">James Mills, j dot mills at griffith dot edu dot au</a></p>
+</body>
+</html>
+"""
+
+
+SAMPLE_VERBOSE_OUTPUT = """\
+Crawling {base_url:s}/
+ Followed: {base_url:s}/
+  Status:  200
+  Links:   5
+  (V): {base_url:s}/
+  (V): {base_url:s}/
+  (F): {base_url:s}/foo/
+  (Q): {base_url:s}/foo/
+  (I): mailto:j.mills@griffith.edu.au
+ Followed: {base_url:s}/foo/
+  Status:  200
+  Links:   3
+  (V): {base_url:s}/foo/
+  (V): {base_url:s}/
+  (F): {base_url:s}/foo/bar/
+ Followed: {base_url:s}/foo/bar/
+  Status:  200
+  Links:   2
+  (V): {base_url:s}/foo/bar/
+  (V): {base_url:s}/foo/
+"""
+
+
+@pytest.fixture()
+def sample_content():
+    return SAMPLE_CONTENT
 
 
 @pytest.fixture()
@@ -35,11 +73,9 @@ def test_fetch_url(webapp):
     assert data == "Hello World!"
 
 
-def test_get_links(s, expected_links):
-    actual_links = [element.get("href") for element in get_links(s)]
-    actual_links.remove(".")
-    actual_links.remove("..")
-    assert actual_links == expected_links
+def test_get_links(sample_content):
+    links = [element.get("href") for element in get_links(sample_content)]
+    assert links == [".", "..", "foo/", "mailto:j.mills@griffith.edu.au"]
 
 
 def test_crawl(webapp, expected_links):
@@ -61,26 +97,7 @@ def test_crawl_patterns(webapp):
 def test_crawl_verbose(webapp, expected_links, capsys):
     assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], verbose=True))) == set(expected_links)
 
-    verbose_output = """\
-Crawling {base_url:s}/
- Followed: {base_url:s}/
-  Status:  200
-  Links:   3
-  (V): {base_url:s}/
-  (V): {base_url:s}/
-  (F): {base_url:s}/foo/
- Followed: {base_url:s}/foo/
-  Status:  200
-  Links:   3
-  (V): {base_url:s}/foo/
-  (V): {base_url:s}/
-  (F): {base_url:s}/foo/bar/
- Followed: {base_url:s}/foo/bar/
-  Status:  200
-  Links:   2
-  (V): {base_url:s}/foo/bar/
-  (V): {base_url:s}/foo/
-""".format(base_url=webapp.server.base)
+    expected_output = SAMPLE_VERBOSE_OUTPUT.format(base_url=webapp.server.base)
 
     out, err = capsys.readouterr()
-    assert out == verbose_output
+    assert out == expected_output
