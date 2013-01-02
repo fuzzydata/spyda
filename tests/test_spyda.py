@@ -42,3 +42,25 @@ def test_get_links(s, expected_links):
 
 def test_crawl(webapp, expected_links):
     assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"]))) == set(expected_links)
+
+
+def test_crawl_verbose(webapp, expected_links, capsys):
+    assert set(map(lambda x: x[0], crawl(webapp.server.base, allowed_domains=["localhost"], verbose=True))) == set(expected_links)
+
+    verbose_output = """\
+Crawling {base_url:s}
+ Followed: {base_url:s}
+  Status:  200
+  Links:   1
+  foo/
+ Followed: {base_url:s}/foo/
+  Status:  200
+  Links:   1
+  bar/
+ Followed: {base_url:s}/bar/
+  Status:  404
+  Links:   1
+""".format(base_url=webapp.server.base)
+
+    out, err = capsys.readouterr()
+    assert out == verbose_output
