@@ -96,7 +96,7 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
         log(
             " Followed: {0:d} {1:s} {2:s} {3:s} {4:s}",
             response.status, response.reason,
-            response["content-type"], response["content-length"],
+            response["content-type"], response.get("content-length", ""),
             current_url.utf8()
         )
 
