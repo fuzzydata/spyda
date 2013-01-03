@@ -2,7 +2,6 @@
 
 """Web Crawler Tool"""
 
-from operator import itemgetter
 from optparse import OptionParser
 
 from . import crawl
@@ -53,20 +52,17 @@ def main():
 
     url = args[0]
 
-    print(
-        "\n".join(
-            map(
-                itemgetter(1),
-                crawl(
-                    url,
-                    allowed_domains=opts.allowed_domains,
-                    max_depth=opts.max_depth,
-                    patterns=opts.patterns,
-                    verbose=opts.verbose
-                )
-            )
-        )
-    )
+    result = crawl(url, **opts.__dict__)
+
+    if result["urls"]:
+        print("URL(s):")
+        print("\n".join(" {0:s} {1:s}".format(*url) for url in result["urls"]))
+    else:
+        print("No URL(s) found!")
+
+    if result["errors"]:
+        print("Error(s):")
+        print("\n".join(" {0:d} {1:s}".format(*url) for url in result["errors"]))
 
 
 if __name__ == "__main__":

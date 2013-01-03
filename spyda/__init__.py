@@ -18,6 +18,7 @@ __date__ = "18th December 2012"
 __version__ = "0.0.1dev"
 
 
+from functools import partial
 from collections import deque
 
 from restclient import GET
@@ -30,13 +31,11 @@ HEADERS = {
 }
 
 
-def fetch_url(url):
-    return GET(url, headers=HEADERS, resp=True)
+fetch_url = partial(GET, headers=HEADERS, resp=True)
 
 
 def get_links(html):
-    dom = parse_html(html)
-    return dom.cssselect("a")
+    return parse_html(html).cssselect("a")
 
 
 def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=False):
@@ -61,6 +60,7 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
     In verbose mode the following single-character letters are used to denonate meaning for URLs being processing:
      - (I) Invalid URL
      - (F) Found a valid URL
+     - (E) Error fetching URL
      - (V) URL already visitied
      - (Q) URL already enqueued
      - (O) URL outside allowed domains
@@ -74,6 +74,8 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
     root_url = parse_url(root_url)
     queue = deque([root_url])
     visited = set()
+    errors = set()
+    urls = set()
     n = 0
 
     if allowed_domains:
@@ -83,17 +85,27 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
 
     while queue:
         if max_depth and n >= max_depth:
-            return
+            break
 
         n += 1
         current_url = queue.popleft()
         visited.add(current_url)
 
         response, content = fetch_url(current_url.utf8())
-        log(" Followed: {0}", current_url.utf8())
-        log("  Status:  {0}", response.status)
 
-        links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
+        log(
+            " Followed: {0:d} {1:s} {2:s} {3:s} {4:s}",
+            response.status, response.reason,
+            response["content-type"], response["content-length"],
+            current_url.utf8()
+        )
+
+        if not response.status == 200:
+            errors.add((response.status, current_url.utf8()))
+            links = []
+        else:
+            links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
+
         log("  Links:   {0}", len(links))
 
         for link in links:
@@ -121,7 +133,12 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
                 log("  (P): {0}", absurl.utf8())
             else:
                 log("  (F): {0}", absurl.utf8())
-                yield url.utf8(), absurl.utf8()
+                urls.add((url.utf8(), absurl.utf8()))
+
+    return {
+        "urls": urls,
+        "errors": errors
+    }
 
 
 __all__ = ("crawl", "fetch_url", "get_links",)
