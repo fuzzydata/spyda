@@ -20,11 +20,22 @@ __version__ = "0.0.1dev"
 
 from functools import partial
 from collections import deque
-
-from restclient import GET
-from url import parse as parse_url
 from re import compile as compile_regex
-from lxml.html import fromstring as parse_html
+
+try:
+    from restclient import GET
+except ImportError:
+    pass  # NOQA
+
+try:
+    from url import parse as parse_url
+except ImportError:
+    pass  # NOQA
+
+try:
+    from lxml.html import fromstring as parse_html
+except ImportError:
+    pass  # NOQA
 
 HEADERS = {
     "User-Agent": "{0} v{1}".format(__name__, __version__)
