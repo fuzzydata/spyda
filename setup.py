@@ -52,6 +52,7 @@ setup(
     packages=find_packages("."),
     scripts=glob("scripts/*"),
     install_requires=[
+        "url",
         "lxml",
         "restclient"
     ],
