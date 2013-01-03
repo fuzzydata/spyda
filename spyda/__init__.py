@@ -57,13 +57,21 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
     :param verbose: If ``True`` will print verbose logging
     :param verbose: bool
 
-    In verbose mode the following single-character letters are used to denonate meaning for URLs being processing:
+    :returns: A dict in the form {"error": set(...), "urls": set(...)}
+              The errors set contains 2-item tuples of (status, url)
+              The urls set contains 2-item tuples of (rel_url, abs_url)
+    :rtype: dict
+
+    In verbose mode the following single-character letters are used to denonate meaning for URLs being processed:
      - (I) Invalid URL
      - (F) Found a valid URL
      - (E) Error fetching URL
      - (V) URL already visitied
      - (Q) URL already enqueued
      - (O) URL outside allowed domains
+
+    Also in verbose mode each followed URL is printed in the form:
+    <status> <reason> <type> <length> <link> <url>
     """
 
     def log(msg, *args):
@@ -81,8 +89,6 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
     if allowed_domains:
         allowed_domains.append(root_url._host)
 
-    log("Crawling {0}", root_url.utf8())
-
     while queue:
         if max_depth and n >= max_depth:
             break
@@ -93,20 +99,18 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
 
         response, content = fetch_url(current_url.utf8())
 
-        log(
-            " Followed: {0:d} {1:s} {2:s} {3:s} {4:s}",
-            response.status, response.reason,
-            response["content-type"], response.get("content-length", ""),
-            current_url.utf8()
-        )
-
         if not response.status == 200:
             errors.add((response.status, current_url.utf8()))
             links = []
         else:
             links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
 
-        log("  Links:   {0}", len(links))
+        log(
+            " {0:d} {1:s} {2:s} {3:s} {4:d} {5:s}",
+            response.status, response.reason,
+            response["content-type"], response.get("content-length", ""),
+            len(links), current_url.utf8()
+        )
 
         for link in links:
             url, absurl = parse_url(link), current_url.relative(link).defrag().canonical()

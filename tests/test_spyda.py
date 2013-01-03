@@ -32,24 +32,19 @@ SAMPLE_CONTENT = """\
 
 
 SAMPLE_VERBOSE_OUTPUT = """\
-Crawling {base_url:s}/
- Followed: 200 OK text/html 535 {base_url:s}/
-  Links:   6
+ 200 OK text/html 535 6 {base_url:s}/
   (V): {base_url:s}/
   (V): {base_url:s}/
   (F): {base_url:s}/foo/
   (Q): {base_url:s}/foo/
   (F): {base_url:s}/asdf/
   (I): mailto:j.mills@griffith.edu.au
- Followed: 200 OK text/html 338 {base_url:s}/foo/
-  Links:   3
+ 200 OK text/html 338 3 {base_url:s}/foo/
   (V): {base_url:s}/foo/
   (V): {base_url:s}/
   (F): {base_url:s}/foo/bar/
- Followed: 404 Not Found text/html; charset=utf-8 640 {base_url:s}/asdf/
-  Links:   0
- Followed: 200 OK text/html 313 {base_url:s}/foo/bar/
-  Links:   2
+ 404 Not Found text/html; charset=utf-8 640 0 {base_url:s}/asdf/
+ 200 OK text/html 313 2 {base_url:s}/foo/bar/
   (V): {base_url:s}/foo/bar/
   (V): {base_url:s}/foo/
 """

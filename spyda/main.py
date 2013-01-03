@@ -2,6 +2,9 @@
 
 """Web Crawler Tool"""
 
+import sys
+from time import clock, time
+from operator import itemgetter
 from optparse import OptionParser
 
 from . import crawl
@@ -52,18 +55,32 @@ def main():
 
     url = args[0]
 
+    if opts.verbose:
+        print("Crawling {0:s}".format(url))
+
+    stime = time()
     result = crawl(url, **opts.__dict__)
 
     if result["urls"]:
-        print("URL(s):")
-        print("\n".join(" {0:s} {1:s}".format(*url) for url in result["urls"]))
+        if opts.verbose:
+            print("URL(s):")
+        print("\n".join(map(itemgetter(1), result["urls"])))
     else:
-        print("No URL(s) found!")
+        if opts.verbose:
+            print("No URL(s) found!")
 
     if result["errors"]:
-        print("Error(s):")
-        print("\n".join(" {0:d} {1:s}".format(*url) for url in result["errors"]))
+        if opts.verbose:
+            print >> sys.stderr, "Error(s):"
+        print >> sys.stderr, "\n".join(" {0:d} {1:s}".format(*url) for url in result["errors"])
 
+    if opts.verbose:
+        cputime = clock()
+        duration = time() - stime
+        urls = len(result["urls"])
+        urls_per_second = int(urls / duration)
+
+        print("{0:d} urls found in {1:0.2f}s ({2:d}/s) using {3:0.2f}s of CPU time.".format(urls, duration, urls_per_second, cputime))
 
 if __name__ == "__main__":
     main()
