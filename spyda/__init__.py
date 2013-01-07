@@ -24,17 +24,17 @@ from re import compile as compile_regex
 
 try:
     from restclient import GET
-except ImportError:
+except ImportError:  # pragma: no cover
     pass  # NOQA
 
 try:
     from url import parse as parse_url
-except ImportError:
+except ImportError:  # pragma: no cover
     pass  # NOQA
 
 try:
     from lxml.html import fromstring as parse_html
-except ImportError:
+except ImportError:  # pragma: no cover
     pass  # NOQA
 
 HEADERS = {
