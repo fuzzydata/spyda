@@ -1,5 +1,8 @@
 .. _Python Programming Language: http://www.python.org/
 .. _Python Standard Library: http://docs.python.org/library/
+.. _restclient: http://pypi.python.org/pypi/restclient
+.. _lxml: http://pypi.python.org/pypi/lxml/3.0.2
+.. _url: http://pypi.python.org/pypi/url
 
 
 Overview
@@ -13,7 +16,9 @@ and store successfully cralwed links and their content in a directory structure 
 Requirements
 ------------
 
-- spyda has no dependencies beyond the `Python Standard Library`_.
+- `restclient`_
+- `lxml`_
+- `url`_
 
 
 Supported Platforms
