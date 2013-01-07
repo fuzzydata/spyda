@@ -42,7 +42,10 @@ HEADERS = {
 }
 
 
-fetch_url = partial(GET, headers=HEADERS, resp=True)
+try:
+    fetch_url = partial(GET, headers=HEADERS, resp=True)
+except:  # pragma: no cover
+    pass  # NOQA
 
 
 def get_links(html):
