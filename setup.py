@@ -54,6 +54,7 @@ setup(
     install_requires=[
         "url",
         "lxml",
+        "cssselect",
         "restclient"
     ],
     entry_points={

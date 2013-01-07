@@ -1,6 +1,7 @@
 .. _Python Programming Language: http://www.python.org/
 .. _Python Standard Library: http://docs.python.org/library/
 .. _restclient: http://pypi.python.org/pypi/restclient
+.. _cssselect: http://pypi.python.org/pypi/cssselect
 .. _lxml: http://pypi.python.org/pypi/lxml/3.0.2
 .. _url: http://pypi.python.org/pypi/url
 
@@ -17,6 +18,7 @@ Requirements
 ------------
 
 - `restclient`_
+- `cssselect`_
 - `lxml`_
 - `url`_
 
