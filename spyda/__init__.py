@@ -14,12 +14,14 @@ and store successfully cralwed links and their content in a directory structure 
 """
 
 __author__ = "James Mills, j dot mills at griffith dot edu dot au"
-__date__ = "18th December 2012"
-__version__ = "0.0.1dev"
+__date__ = "9th January 2013"
+__version__ = "0.0.2dev"
 
 
 from functools import partial
 from collections import deque
+from traceback import format_exc
+from re import escape as escape_regex
 from re import compile as compile_regex
 
 try:
@@ -52,15 +54,15 @@ def get_links(html):
     return parse_html(html).cssselect("a")
 
 
-def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=False):
+def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False):
     """Crawl a given url recursively for urls.
 
     :param root_url: Root URL to start crawling from.
     :type  root_url: str
 
-    :param allowed_domains: A list of allowed domains to traverse. If evaluates to ``False``, allows all domains.
-                            By default the domain of the starting URL above is added to the list.
-    :type  allowed_domains: list or None or False
+    :param allowed_urls: A list of allowed urls (matched by regex) to traverse.
+                         By default a regex is compiled for the ``root_url`` and used.
+    :type  allowed_urls: list or None
 
     :param max_depth: Maximum depth to follow, 0 for unlimited depth.
     :param max_depth: int
@@ -77,12 +79,13 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
     :rtype: dict
 
     In verbose mode the following single-character letters are used to denonate meaning for URLs being processed:
-     - (I) Invalid URL
-     - (F) Found a valid URL
-     - (E) Error fetching URL
-     - (V) URL already visitied
-     - (Q) URL already enqueued
-     - (O) URL outside allowed domains
+     - (I) (I)nvalid URL
+     - (F) (F)ound a valid URL
+     - (S) (S)een this URL before
+     - (E) (E)rror fetching URL
+     - (V) URL already (V)isitied
+     - (Q) URL already en(Q)ueued
+     - (O) URL (O)utside allowed domains
 
     Also in verbose mode each followed URL is printed in the form:
     <status> <reason> <type> <length> <link> <url>
@@ -92,66 +95,100 @@ def crawl(root_url, allowed_domains=None, max_depth=0, patterns=None, verbose=Fa
         if verbose:
             print(msg.format(*args))
 
-    patterns = [compile_regex(pattern) for pattern in patterns] if patterns else []
+    patterns = [compile_regex(regex) for regex in patterns] if patterns else []
     root_url = parse_url(root_url)
     queue = deque([root_url])
-    visited = set()
-    errors = set()
-    urls = set()
+    visited = []
+    errors = []
+    urls = []
     n = 0
 
-    if allowed_domains:
-        allowed_domains.append(root_url._host)
+    if not allowed_urls:
+        allowed_urls = ["^{0:s}.*(?is)".format(escape_regex(root_url.utf8()))]
+
+    allowed_urls = [compile_regex(regex) for regex in allowed_urls]
 
     while queue:
-        if max_depth and n >= max_depth:
-            break
+        try:
+            if max_depth and n >= max_depth:
+                break
 
-        n += 1
-        current_url = queue.popleft()
-        visited.add(current_url)
+            n += 1
+            current_url = queue.popleft()
+            _current_url = current_url.utf8()
+            visited.append(current_url)
 
-        response, content = fetch_url(current_url.utf8())
+            response, content = fetch_url(_current_url)
 
-        if not response.status == 200:
-            errors.add((response.status, current_url.utf8()))
-            links = []
-        else:
-            links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
-
-        log(
-            " {0:d} {1:s} {2:s} {3:s} {4:d} {5:s}",
-            response.status, response.reason,
-            response["content-type"], response.get("content-length", ""),
-            len(links), current_url.utf8()
-        )
-
-        for link in links:
-            url, absurl = parse_url(link), current_url.relative(link).defrag().canonical()
-
-            if absurl._scheme not in ("http", "https"):
-                log("  (I): {0}", absurl.utf8())
-                continue
-
-            if any(absurl.equiv(url) for url in visited):
-                log("  (V): {0}", absurl.utf8())
-                continue
-
-            if any(absurl.equiv(url) for url in queue):
-                log("  (Q): {0}", absurl.utf8())
-                continue
-
-            if allowed_domains and absurl._host not in allowed_domains:
-                log("  (O): {0}", absurl.utf8())
-                continue
-
-            queue.append(absurl)
-
-            if patterns and not any((pattern.match(url.utf8()) is not None) or (pattern.match(absurl.utf8()) is not None) for pattern in patterns):
-                log("  (P): {0}", absurl.utf8())
+            if not response.status == 200:
+                errors.append((response.status, _current_url))
+                links = []
             else:
-                log("  (F): {0}", absurl.utf8())
-                urls.add((url.utf8(), absurl.utf8()))
+                #links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
+                links = [link.get("href") for link in get_links(content)]
+
+            log(
+                " {0:d} {1:s} {2:s} {3:s} {4:d} {5:s}",
+                response.status, response.reason,
+                response["content-type"], response.get("content-length", ""),
+                len(links), current_url.utf8()
+            )
+
+            for link in links:
+                #url, absurl = parse_url(link), current_url.relative(link).defrag().canonical()
+                #_url, _absurl = url.utf8(), absurl.utf8()
+                url = current_url.relative(link).defrag().canonical()
+                _url = url.utf8()
+
+                if _url in urls:
+                    continue
+
+                #if absurl._scheme not in ("http", "https"):
+                if url._scheme not in ("http", "https"):
+                    #log("  (I): {0}", _absurl)
+                    log("  (I): {0}", _url)
+                    continue
+
+                #if any(absurl.equiv(url) for url in visited):
+                #if _absurl in visited:
+                if _url in visited:
+                    #log("  (V): {0}", _absurl)
+                    log("  (V): {0}", _url)
+                    continue
+
+                #if any(absurl.equiv(url) for url in queue):
+                #if _absurl in queue:
+                if _url in queue:
+                    #log("  (Q): {0}", _absurl)
+                    log("  (Q): {0}", _url)
+                    continue
+
+                #if allowed_urls and not any((regex.match(_url) is not None) or (regex.match(_absurl) is not None) for regex in allowed_urls):
+                if allowed_urls and not any((regex.match(_url) is not None) for regex in allowed_urls):
+                    #log("  (O): {0}", _absurl)
+                    log("  (O): {0}", _url)
+                    continue
+
+                #queue.append(absurl)
+                queue.append(url)
+
+                #if patterns and not any((regex.match(_url) is not None) or (regex.match(_absurl) is not None) for regex in patterns):
+                if patterns and not any((regex.match(_url) is not None) for regex in patterns):
+                    #log("  (P): {0}", _absurl)
+                    log("  (P): {0}", _url)
+                else:
+                    if _url not in urls:
+                        #log("  (F): {0}", _absurl)
+                        log("  (F): {0}", _url)
+                        #urls.append((_url, _absurl))
+                        urls.append(_url)
+                    else:
+                        log("  (S): {0}", _url)
+        except Exception as e:
+            log("ERROR: {0:s}", e)
+            log(format_exc())
+        except KeyboardInterrupt:
+            break
 
     return {
         "urls": urls,

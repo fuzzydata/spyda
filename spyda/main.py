@@ -4,7 +4,6 @@
 
 import sys
 from time import clock, time
-from operator import itemgetter
 from optparse import OptionParser
 
 from . import crawl
@@ -18,9 +17,9 @@ def parse_options():
     parser = OptionParser(usage=USAGE, version=VERSION)
 
     parser.add_option(
-        "-a", "--allowed_domain",
-        action="append", default=None, dest="allowed_domains",
-        help="Allowed domain to traverse (multiple allowed)."
+        "-a", "--allowed_url",
+        action="append", default=None, dest="allowed_urls",
+        help="Allowed url to traverse (multiple allowed)."
     )
 
     parser.add_option(
@@ -64,7 +63,7 @@ def main():
     if result["urls"]:
         if opts.verbose:
             print("URL(s):")
-        print("\n".join(map(itemgetter(1), result["urls"])))
+        print("\n".join(result["urls"]))
     else:
         if opts.verbose:
             print("No URL(s) found!")
