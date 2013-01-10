@@ -36,9 +36,10 @@ except ImportError:  # pragma: no cover
     pass  # NOQA
 
 try:
-    from lxml.html import fromstring as parse_html
+    from lxml.html.soupparser import fromstring as parse_html
 except ImportError:  # pragma: no cover
     pass  # NOQA
+
 
 HEADERS = {
     "User-Agent": "{0} v{1}".format(__name__, __version__)
@@ -52,7 +53,7 @@ except:  # pragma: no cover
 
 
 def get_links(html):
-    return parse_html(html).cssselect("a")
+    return (link.get("href") for link in parse_html(html).cssselect("a"))
 
 
 def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False):
@@ -130,7 +131,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                 errors.append((response.status, _current_url))
                 links = []
             else:
-                links = [link.get("href") for link in get_links(content)]
+                links = list(get_links(content))
 
             log(
                 " {0:d} {1:s} {2:s} {3:s} {4:d} {5:s}",
