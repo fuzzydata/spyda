@@ -29,6 +29,12 @@ def parse_options():
     )
 
     parser.add_option(
+        "-o", "--output",
+        action="store", default=None, dest="output",
+        help="Output directory to dump crawled URL(s)"
+    )
+
+    parser.add_option(
         "-p", "--pattern",
         action="append", default=None, dest="patterns",
         help="URL pattern to match (multiple allowed)."

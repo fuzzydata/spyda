@@ -19,6 +19,7 @@ __version__ = "0.0.2dev"
 
 
 import sys
+from os import makedirs, path
 from functools import partial
 from collections import deque
 from traceback import format_exc
@@ -56,7 +57,7 @@ def get_links(html, badchars="\"' \v\f\t\n\r"):
     return (link.get("href").strip(badchars) for link in parse_html(html).cssselect("a"))
 
 
-def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False):
+def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, verbose=False):
     """Crawl a given url recursively for urls.
 
     :param root_url: Root URL to start crawling from.
@@ -71,6 +72,9 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
 
     :param patterns: A list of regex patterns to match urls against. If evaluates to ``False``, matches all urls.
     :type  patterns: list or None or False
+
+    :param output: An optional output path to dump the contents of crawled URL(s)
+    :type  output: str or None
 
     :param verbose: If ``True`` will print verbose logging
     :param verbose: bool
@@ -101,6 +105,9 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
         if verbose:
             print(msg.format(*args))
 
+    def error(msg, *args):
+        print >> sys.stderr, msg.format(*args)
+
     patterns = [compile_regex(regex) for regex in patterns] if patterns else []
     root_url = parse_url(root_url)
     queue = deque([root_url])
@@ -115,6 +122,9 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
 
     allowed_urls = [compile_regex(regex) for regex in allowed_urls]
 
+    if output is not None:
+        output = path.abspath(path.expanduser(output))
+
     while queue:
         try:
             if max_depth and n >= max_depth:
@@ -126,6 +136,22 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
             visited.append(_current_url)
 
             response, content = fetch_url(_current_url)
+
+            if output is not None and path.exists(output):
+                filename = current_url.escape().utf8()
+                filename = filename[(filename.index("://") + 3):]
+
+                filepath = path.join(output, path.dirname(filename))
+                if not path.exists(filepath):
+                    makedirs(filepath)
+
+                basename = path.basename(filename)
+                if not basename:
+                    basename = "index.html"
+
+                fullpath = path.join(filepath, basename)
+
+                open(fullpath, "w").write(content)
 
             if not response.status == 200:
                 errors.append((response.status, _current_url))
@@ -175,8 +201,8 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                     l += 1
             status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
         except Exception as e:
-            log("ERROR: {0:s}", e)
-            log(format_exc())
+            error("ERROR: {0:s}", e)
+            error(format_exc())
         except KeyboardInterrupt:
             break
 
