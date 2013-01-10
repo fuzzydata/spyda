@@ -107,6 +107,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
     errors = []
     urls = []
     n = 0
+    l = 0
 
     if not allowed_urls:
         allowed_urls = ["^{0:s}.*(?is)".format(escape_regex(root_url.utf8()))]
@@ -159,6 +160,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                     continue
 
                 if allowed_urls and not any((regex.match(_url) is not None) for regex in allowed_urls):
+                    visited.append(_url)
                     log("  (O): {0}", _url)
                     continue
 
@@ -169,7 +171,8 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                 else:
                     log("  (F): {0}", _url)
                     urls.append(_url)
-            status("F: {0:d} L: {1:d}", n, len(urls))
+                    l += 1
+            status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
         except Exception as e:
             log("ERROR: {0:s}", e)
             log(format_exc())
