@@ -52,8 +52,8 @@ except:  # pragma: no cover
     pass  # NOQA
 
 
-def get_links(html):
-    return (link.get("href") for link in parse_html(html).cssselect("a"))
+def get_links(html, badchars="\"' \v\f\t\n\r"):
+    return (link.get("href").strip(badchars) for link in parse_html(html).cssselect("a"))
 
 
 def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False):
