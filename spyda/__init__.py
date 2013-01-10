@@ -18,6 +18,7 @@ __date__ = "9th January 2013"
 __version__ = "0.0.2dev"
 
 
+import sys
 from functools import partial
 from collections import deque
 from traceback import format_exc
@@ -90,6 +91,10 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
     Also in verbose mode each followed URL is printed in the form:
     <status> <reason> <type> <length> <link> <url>
     """
+
+    def status(msg, *args):
+        sys.stderr.write("\r\x1b[K{0:s}".format(msg.format(*args)))
+        sys.stderr.flush()
 
     def log(msg, *args):
         if verbose:
@@ -164,6 +169,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                 else:
                     log("  (F): {0}", _url)
                     urls.append(_url)
+            status("F: {0:d} L: {1:d}", n, len(urls))
         except Exception as e:
             log("ERROR: {0:s}", e)
             log(format_exc())
