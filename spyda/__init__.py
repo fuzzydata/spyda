@@ -116,7 +116,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
             n += 1
             current_url = queue.popleft()
             _current_url = current_url.utf8()
-            visited.append(current_url)
+            visited.append(_current_url)
 
             response, content = fetch_url(_current_url)
 
@@ -124,7 +124,6 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                 errors.append((response.status, _current_url))
                 links = []
             else:
-                #links = filter(lambda link: link is not None, (link.get("href") for link in get_links(content)))
                 links = [link.get("href") for link in get_links(content)]
 
             log(
@@ -135,55 +134,36 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
             )
 
             for link in links:
-                #url, absurl = parse_url(link), current_url.relative(link).defrag().canonical()
-                #_url, _absurl = url.utf8(), absurl.utf8()
                 url = current_url.relative(link).defrag().canonical()
                 _url = url.utf8()
 
                 if _url in urls:
+                    log("  (S): {0}", _url)
                     continue
 
-                #if absurl._scheme not in ("http", "https"):
                 if url._scheme not in ("http", "https"):
-                    #log("  (I): {0}", _absurl)
                     log("  (I): {0}", _url)
                     continue
 
-                #if any(absurl.equiv(url) for url in visited):
-                #if _absurl in visited:
                 if _url in visited:
-                    #log("  (V): {0}", _absurl)
                     log("  (V): {0}", _url)
                     continue
 
-                #if any(absurl.equiv(url) for url in queue):
-                #if _absurl in queue:
                 if _url in queue:
-                    #log("  (Q): {0}", _absurl)
                     log("  (Q): {0}", _url)
                     continue
 
-                #if allowed_urls and not any((regex.match(_url) is not None) or (regex.match(_absurl) is not None) for regex in allowed_urls):
                 if allowed_urls and not any((regex.match(_url) is not None) for regex in allowed_urls):
-                    #log("  (O): {0}", _absurl)
                     log("  (O): {0}", _url)
                     continue
 
-                #queue.append(absurl)
                 queue.append(url)
 
-                #if patterns and not any((regex.match(_url) is not None) or (regex.match(_absurl) is not None) for regex in patterns):
                 if patterns and not any((regex.match(_url) is not None) for regex in patterns):
-                    #log("  (P): {0}", _absurl)
                     log("  (P): {0}", _url)
                 else:
-                    if _url not in urls:
-                        #log("  (F): {0}", _absurl)
-                        log("  (F): {0}", _url)
-                        #urls.append((_url, _absurl))
-                        urls.append(_url)
-                    else:
-                        log("  (S): {0}", _url)
+                    log("  (F): {0}", _url)
+                    urls.append(_url)
         except Exception as e:
             log("ERROR: {0:s}", e)
             log(format_exc())
