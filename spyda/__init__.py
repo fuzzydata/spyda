@@ -54,7 +54,9 @@ except:  # pragma: no cover
 
 
 def get_links(html, badchars="\"' \v\f\t\n\r"):
-    return (link.get("href").strip(badchars) for link in parse_html(html).cssselect("a"))
+    tags = parse_html(html).cssselect("a")
+    hrefs = (tag.get("href") for tag in tags)
+    return (href.strip(badchars) for href in hrefs if href is not None)
 
 
 def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, verbose=False):
