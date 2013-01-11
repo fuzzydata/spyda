@@ -235,7 +235,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
     }
 
 
-def extract(source, filters=None, output=None):
+def extract(source, filters=None, output=None, verbose=False):
     filters = dict(filter.split("=") for filter in filters)
 
     if any(source.lower().startswith(protocol) for protocol in PROTOCOLS):
