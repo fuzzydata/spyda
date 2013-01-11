@@ -54,12 +54,14 @@ setup(
     install_requires=[
         "url",
         "lxml",
+        "nltk",
         "cssselect",
         "restclient"
     ],
     entry_points={
         "console_scripts": [
-            "spyda=spyda.main:main"
+            "crawl=spyda.crawler:main",
+            "extract=spyda.extractor:main"
         ]
     },
     zip_safe=False,
