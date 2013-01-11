@@ -79,7 +79,7 @@ def status(msg, *args):
 
 
 def parse_html(html):
-    return clean_html(html_to_doc(html))
+    return html_to_doc(clean_html(html))
 
 
 def doc_to_text(doc, encoding="ascii"):
