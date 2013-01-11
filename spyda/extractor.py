@@ -28,13 +28,6 @@ def parse_options():
     )
 
     parser.add_option(
-        "-t", "--output-type",
-        action="store", default="text/plain", dest="output_type",
-        choices=["application/json", "text/plain"],
-        help="Output type of output files"
-    )
-
-    parser.add_option(
         "-v", "--verbose",
         action="store_true", default=False, dest="verbose",
         help="Enable verbose logging"
