@@ -247,7 +247,7 @@ def extract(source, filters=None, output=None, verbose=False):
 
     doc = parse_html(content)
 
-    result = dict((k, doc_to_text(doc.cssselect(v))) for k, v in filters.items())
+    result = dict((k, doc_to_text(doc.cssselect(v)[0])) for k, v in filters.items())
 
     if output is not None and path.exists(output):
         if url is not None:
