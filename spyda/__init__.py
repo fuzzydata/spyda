@@ -37,7 +37,14 @@ except ImportError:  # pragma: no cover
     pass  # NOQA
 
 try:
-    from lxml.html.soupparser import fromstring as parse_html
+    from lxml.html.clean import clean_html
+    from lxml.html import tostring as doc_to_str
+    from lxml.html.soupparser import fromstring as html_to_doc
+except ImportError:  # pragma: no cover
+    pass  # NOQA
+
+try:
+    from nltk import clean_html as html_to_text
 except ImportError:  # pragma: no cover
     pass  # NOQA
 
@@ -51,6 +58,28 @@ try:
     fetch_url = partial(GET, headers=HEADERS, resp=True)
 except:  # pragma: no cover
     pass  # NOQA
+
+
+def log(msg, *args, **kwargs):
+    sys.stderr.write("{0:s}{1:s}".format(msg.format(*args), kwargs.get("n", "\n")))
+    sys.stderr.flush()
+
+
+def error(e):
+    log("ERROR: {0:s}", e)
+    log(format_exc())
+
+
+def status(msg, *args):
+    log("\r\x1b[K{0:s}", msg.format(*args), n="")
+
+
+def parse_html(html):
+    return clean_html(html_to_doc(html))
+
+
+def doc_to_text(doc, encoding="ascii"):
+    return html_to_text(doc_to_str(doc, encoding=encoding))
 
 
 def get_links(html, badchars="\"' \v\f\t\n\r"):
@@ -98,17 +127,6 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
     Also in verbose mode each followed URL is printed in the form:
     <status> <reason> <type> <length> <link> <url>
     """
-
-    def status(msg, *args):
-        sys.stderr.write("\r\x1b[K{0:s}".format(msg.format(*args)))
-        sys.stderr.flush()
-
-    def log(msg, *args):
-        if verbose:
-            print(msg.format(*args))
-
-    def error(msg, *args):
-        print >> sys.stderr, msg.format(*args)
 
     patterns = [compile_regex(regex) for regex in patterns] if patterns else []
     root_url = parse_url(root_url)
@@ -161,7 +179,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
             else:
                 links = list(get_links(content))
 
-            log(
+            verbose and log(
                 " {0:d} {1:s} {2:s} {3:s} {4:d} {5:s}",
                 response.status, response.reason,
                 response["content-type"], response.get("content-length", ""),
@@ -173,38 +191,37 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
                 _url = url.utf8()
 
                 if _url in urls:
-                    log("  (S): {0}", _url)
+                    verbose and log("  (S): {0}", _url)
                     continue
 
                 if url._scheme not in ("http", "https"):
-                    log("  (I): {0}", _url)
+                    verbose and log("  (I): {0}", _url)
                     continue
 
                 if _url in visited:
-                    log("  (V): {0}", _url)
+                    verbose and log("  (V): {0}", _url)
                     continue
 
                 if _url in queue:
-                    log("  (Q): {0}", _url)
+                    verbose and log("  (Q): {0}", _url)
                     continue
 
                 if allowed_urls and not any((regex.match(_url) is not None) for regex in allowed_urls):
                     visited.append(_url)
-                    log("  (O): {0}", _url)
+                    verbose and log("  (O): {0}", _url)
                     continue
 
                 queue.append(url)
 
                 if patterns and not any((regex.match(_url) is not None) for regex in patterns):
-                    log("  (P): {0}", _url)
+                    verbose and log("  (P): {0}", _url)
                 else:
-                    log("  (F): {0}", _url)
+                    verbose and log("  (F): {0}", _url)
                     urls.append(_url)
                     l += 1
-            status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
+            not verbose and status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
         except Exception as e:
-            error("ERROR: {0:s}", e)
-            error(format_exc())
+            error(e)
         except KeyboardInterrupt:
             break
 
