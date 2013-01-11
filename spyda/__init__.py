@@ -38,7 +38,6 @@ except ImportError:  # pragma: no cover
     pass  # NOQA
 
 try:
-    from lxml.html.clean import clean_html
     from lxml.html import tostring as doc_to_str
     from lxml.html.soupparser import fromstring as html_to_doc
 except ImportError:  # pragma: no cover
@@ -79,7 +78,7 @@ def status(msg, *args):
 
 
 def parse_html(html):
-    return html_to_doc(clean_html(html))
+    return html_to_doc(html)
 
 
 def doc_to_text(doc, encoding="ascii"):
