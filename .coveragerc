@@ -1,5 +1,6 @@
 [run]
-omit = spyda/main.py
+omit = spyda/crawler.py
+       spyda/extractor.py
        tests/*
 
 [html]
