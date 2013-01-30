@@ -24,6 +24,11 @@ def sample_url(request, webapp):
 
 
 @pytest.fixture()
+def sample_url_index(request, webapp):
+    return urljoin(webapp.server.base, "sample/")
+
+
+@pytest.fixture()
 def filters(request):
     return ["title=#article .title", "content=#article #content"]
 
@@ -53,6 +58,14 @@ def test_extract_url(sample_url, filters, expected_result):
 def test_extract_url_output(sample_url, filters, expected_result, tmpdir):
     extract(sample_url, filters, output=str(tmpdir))
     filename = parse_url(sample_url).escape().utf8()
+    file = tmpdir.join(filename[(filename.index("://") + 3):])
+    result = loads(file.read())
+    assert result == expected_result
+
+
+def test_extract_url_index_output(sample_url_index, filters, expected_result, tmpdir):
+    extract(sample_url_index, filters, output=str(tmpdir))
+    filename = parse_url(sample_url_index).relative("index.html").escape().utf8()
     file = tmpdir.join(filename[(filename.index("://") + 3):])
     result = loads(file.read())
     assert result == expected_result
