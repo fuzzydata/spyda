@@ -210,7 +210,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
             not verbose and status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
         except Exception as e:
             error(e)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # pragma: no cover
             break
 
     return {
