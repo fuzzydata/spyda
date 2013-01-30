@@ -27,26 +27,11 @@ from traceback import format_exc
 from re import escape as escape_regex
 from re import compile as compile_regex
 
-try:
-    from restclient import GET
-except ImportError:  # pragma: no cover
-    pass  # NOQA
-
-try:
-    from url import parse as parse_url
-except ImportError:  # pragma: no cover
-    pass  # NOQA
-
-try:
-    from lxml.html import tostring as doc_to_str
-    from lxml.html.soupparser import fromstring as html_to_doc
-except ImportError:  # pragma: no cover
-    pass  # NOQA
-
-try:
-    from nltk import clean_html as html_to_text
-except ImportError:  # pragma: no cover
-    pass  # NOQA
+from restclient import GET
+from url import parse as parse_url
+from nltk import clean_html as html_to_text
+from lxml.html import tostring as doc_to_str
+from lxml.html.soupparser import fromstring as html_to_doc
 
 
 HEADERS = {

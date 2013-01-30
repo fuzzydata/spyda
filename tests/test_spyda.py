@@ -3,11 +3,8 @@
 import pytest
 
 from urlparse import urljoin
-from operator import itemgetter
 
-from py import path
-
-from spyda import crawl, fetch_url, get_links
+from spyda import fetch_url, get_links
 
 
 SAMPLE_CONTENT = """\
@@ -25,29 +22,18 @@ SAMPLE_CONTENT = """\
  <p><a href=".">.</a></p>
  <p><a href="..">..</a></p>
  <p><a href="foo/">foo/</a></p>
- <p>Test suite created by <a href="mailto:j.mills@griffith.edu.au">James Mills, j dot mills at griffith dot edu dot au</a></p>
+ <p>
+  Test suite created by
+  <a href="mailto:foo@bar.com">
+   Foo Bar, foo at bar dot com
+  </a>
+ </p>
 </body>
 </html>
 """
 
 
-SAMPLE_VERBOSE_OUTPUT = """\
- 200 OK text/html 535 6 {base_url:s}/
-  (V): {base_url:s}/
-  (V): {base_url:s}/
-  (F): {base_url:s}/foo/
-  (Q): {base_url:s}/foo/
-  (F): {base_url:s}/asdf/
-  (I): mailto:j.mills@griffith.edu.au
- 200 OK text/html 338 3 {base_url:s}/foo/
-  (V): {base_url:s}/foo/
-  (V): {base_url:s}/
-  (F): {base_url:s}/foo/bar/
- 404 Not Found text/html; charset=utf-8 640 0 {base_url:s}/asdf/
- 200 OK text/html 313 2 {base_url:s}/foo/bar/
-  (V): {base_url:s}/foo/bar/
-  (V): {base_url:s}/foo/
-"""
+SAMPLE_LINKS = [".", "..", "foo/", "mailto:foo@bar.com"]
 
 
 @pytest.fixture()
@@ -56,54 +42,16 @@ def sample_content():
 
 
 @pytest.fixture()
-def expected_links():
-    links = []
-    for p in path.local(__file__).dirpath().visit(fil="links.txt", rec=True):
-        links.extend([link for link in p.readlines(False) if link])
-    return sorted(links)
+def sample_links():
+    return SAMPLE_LINKS
 
 
 def test_fetch_url(webapp):
     res, data = fetch_url(urljoin(webapp.server.base, "hello"))
     assert res.status == 200
-    assert data == "Hello World!"
+    assert data == b"Hello World!"
 
 
-def test_get_links(sample_content):
-    links = [element.get("href") for element in get_links(sample_content)]
-    assert links == [".", "..", "foo/", "mailto:j.mills@griffith.edu.au"]
-
-
-def test_crawl(webapp, expected_links):
-    result = crawl(webapp.server.base)
-    assert result["errors"] == set([(404, urljoin(webapp.server.base, "asdf/"))])
-    assert sorted(map(itemgetter(0), result["urls"])) == expected_links
-
-
-def test_crawl_allowed_domains(webapp):
-    result = crawl(urljoin(webapp.server.base, "external"), allowed_domains=["localhost"])
-    assert not result["urls"]
-    assert not result["errors"]
-
-
-def test_crawl_max_depth(webapp):
-    result = crawl(webapp.server.base, max_depth=1)
-    assert not result["errors"]
-    assert sorted(map(itemgetter(0), result["urls"])) == ["asdf/", "foo/"]
-
-
-def test_crawl_patterns(webapp):
-    result = crawl(webapp.server.base, patterns=["^.*\/foo\/$"])
-    assert result["errors"] == set([(404, urljoin(webapp.server.base, "asdf/"))])
-    assert sorted(map(itemgetter(0), result["urls"])) == ["foo/"]
-
-
-def test_crawl_verbose(webapp, expected_links, capsys):
-    result = crawl(webapp.server.base, verbose=True)
-    assert result["errors"] == set([(404, urljoin(webapp.server.base, "asdf/"))])
-    assert sorted(map(itemgetter(0), result["urls"])) == expected_links
-
-    expected_output = SAMPLE_VERBOSE_OUTPUT.format(base_url=webapp.server.base)
-
-    out, err = capsys.readouterr()
-    assert out == expected_output
+def test_get_links(sample_content, sample_links):
+    actual_links = list(get_links(sample_content))
+    assert actual_links == sample_links

@@ -34,12 +34,10 @@ try:
 except IOError:
     README = RELEASE = ""
 
-import spyda
-
 setup(
-    name=spyda.__name__,
-    version=spyda.__version__,
-    description=spyda.__doc__.split()[0],
+    name="spyda",
+    version="0.0.2dev",
+    description="Python Spider Tool(s) and Library",
     long_description="%s\n\n%s" % (README, RELEASE),
     author="James Mills",
     author_email="James Mills, j dot mills at griffith dot edu dot au",
@@ -56,7 +54,8 @@ setup(
         "lxml",
         "nltk",
         "cssselect",
-        "restclient"
+        "restclient",
+        "BeautifulSoup"
     ],
     entry_points={
         "console_scripts": [
