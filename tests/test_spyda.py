@@ -2,10 +2,10 @@
 
 import pytest
 
-from urlparse import urljoin
-
 from spyda import fetch_url, get_links
 
+
+from .helpers import urljoin
 
 SAMPLE_CONTENT = """\
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"

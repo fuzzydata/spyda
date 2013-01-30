@@ -3,9 +3,10 @@
 import pytest
 
 from os import path
-from urlparse import urljoin
 
 from spyda import crawl
+
+from .helpers import urljoin
 
 
 @pytest.fixture()
@@ -21,7 +22,6 @@ def expected_links(request, webapp):
 
 def test_crawl(webapp, expected_links):
     result = crawl(webapp.server.base)
-    print(repr(result["urls"]))
     assert set(result["errors"]) == set([(404, urljoin(webapp.server.base, "asdf/"))])
     assert sorted(result["urls"]) == expected_links
 
