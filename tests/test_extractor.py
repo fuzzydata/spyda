@@ -3,6 +3,7 @@
 import pytest
 
 from os import path
+from json import loads
 
 from spyda import extract
 
@@ -11,7 +12,8 @@ from .helpers import urljoin
 
 @pytest.fixture()
 def sample_file(request):
-    return path.join(path.dirname(__file__), "docroot", "sample.html")
+    root = path.dirname(__file__)
+    return path.relpath(path.join(root, "docroot", "sample.html"), path.join(path.dirname(__file__), ".."))
 
 
 @pytest.fixture()
@@ -31,6 +33,16 @@ def expected_result(request):
 
 def test_extract_file(sample_file, filters, expected_result):
     result = extract(sample_file, filters)
+    assert result == expected_result
+
+
+def test_extract_file_output(sample_file, filters, expected_result, tmpdir):
+    result = extract(sample_file, filters)
+    assert result == expected_result
+
+    extract(sample_file, filters, output=str(tmpdir))
+    file = tmpdir.join(sample_file)
+    result = loads(file.read())
     assert result == expected_result
 
 
