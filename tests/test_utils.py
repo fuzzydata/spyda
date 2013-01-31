@@ -25,6 +25,16 @@ def test_unescape(entity, expected):
     assert actual == expected
 
 
+def test_unescape_hash_x():
+    entity = "&#xa0;"
+    assert unescape(entity) == u"\xa0"
+
+
+def test_unescape_invalid():
+    entity = "&foobar;"
+    assert unescape(entity) == entity
+
+
 def test_unichar_to_text(unichar, expected):
     actual = unichar_to_text(unichar)
     assert actual == expected
