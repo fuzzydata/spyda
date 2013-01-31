@@ -33,6 +33,10 @@ from nltk import clean_html as html_to_text
 from lxml.html import tostring as doc_to_str
 from lxml.html.soupparser import fromstring as html_to_doc
 
+from lxml.html import HtmlElement
+empty_doc = HtmlElement()
+del HtmlElement
+
 
 HEADERS = {
     "User-Agent": "{0} v{1}".format(__name__, __version__)
@@ -226,7 +230,7 @@ def extract(source, filters=None, output=None, verbose=False):
 
     doc = parse_html(content)
 
-    result = dict((k, doc_to_text(doc.cssselect(v)[0])) for k, v in filters.items())
+    result = dict((k, doc_to_text((doc.cssselect(v) or [empty_doc])[0])) for k, v in filters.items())
 
     if output is not None and path.exists(output):
         if url is not None:

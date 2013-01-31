@@ -43,6 +43,14 @@ def test_extract_file(sample_file, filters, expected_result):
     assert result == expected_result
 
 
+def test_extract_file_null(sample_file):
+    filters = ("foo=bar",)
+    expected_result = {"foo": ""}
+
+    result = extract(sample_file, filters)
+    assert result == expected_result
+
+
 def test_extract_file_output(sample_file, filters, expected_result, tmpdir):
     extract(sample_file, filters, output=str(tmpdir))
     file = tmpdir.join(sample_file)
