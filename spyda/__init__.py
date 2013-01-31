@@ -53,7 +53,7 @@ def log(msg, *args, **kwargs):
     sys.stderr.flush()
 
 
-def error(e):
+def error(e):  # pragma: no cover
     log("ERROR: {0:s}", e)
     log(format_exc())
 
@@ -208,7 +208,7 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
                     urls.append(_url)
                     l += 1
             not verbose and status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             error(e)
         except KeyboardInterrupt:  # pragma: no cover
             break
