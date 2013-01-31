@@ -37,7 +37,7 @@ from lxml.html import HtmlElement
 empty_doc = HtmlElement()
 del HtmlElement
 
-from .utils import cleanup, unescape
+from .utils import unichar_to_text, unescape
 
 HEADERS = {
     "User-Agent": "{0} v{1}".format(__name__, __version__)
@@ -231,7 +231,7 @@ def extract(source, filters=None, output=None, verbose=False):
 
     doc = parse_html(content)
 
-    result = dict((k, cleanup(unescape(doc_to_text((doc.cssselect(v) or [empty_doc])[0])))) for k, v in filters.items())
+    result = dict((k, unichar_to_text(unescape(doc_to_text((doc.cssselect(v) or [empty_doc])[0])))) for k, v in filters.items())
 
     if output is not None and path.exists(output):
         if url is not None:

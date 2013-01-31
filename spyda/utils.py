@@ -1,11 +1,12 @@
 import re
 import htmlentitydefs
 
-REPLACEMENTS = (
-    (u"\xa0", u""),      # Unicide non-breaking space
-    (u"\u2019", u"'"),   # Unicode right single quote
-    (u"\u201c", u"\""),  # Unicode left double quote
-    (u"\u201d", u"\"")   # Unicode right double quote
+UNICHAR_REPLACEMENTS = (
+    (u"\xa0",   u" "),      # non breaking space
+    (u"\u2018", u"`"),      # left single quote
+    (u"\u2019", u"'"),      # right single quote
+    (u"\u201c", u"\""),     # left double quote
+    (u"\u201d", u"\""),     # right double quote
 )
 
 
@@ -38,10 +39,13 @@ def unescape(text):
     return re.sub("&#?\w+;", fixup, text)
 
 
-def cleanup(text):
-    """Cleanup text abd replace commonly found entities such as smart quotes and non-breaking spaces"""
+def unichar_to_text(text):
+    """Convert some common unicode characters to their plain text equivilent.
 
-    for replacement in REPLACEMENTS:
+    This includes for example left and right double quotes, left and right single quotes, etc.
+    """
+
+    for replacement in UNICHAR_REPLACEMENTS:
         text = text.replace(*replacement)
 
     return text
