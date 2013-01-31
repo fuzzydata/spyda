@@ -109,7 +109,6 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
      - (S) (S)een this URL before
      - (E) (E)rror fetching URL
      - (V) URL already (V)isitied
-     - (Q) URL already en(Q)ueued
      - (O) URL (O)utside allowed domains
 
     Also in verbose mode each followed URL is printed in the form:
@@ -188,10 +187,6 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
 
                 if _url in visited:
                     verbose and log("  (V): {0}", _url)
-                    continue
-
-                if _url in queue:
-                    verbose and log("  (Q): {0}", _url)
                     continue
 
                 if allowed_urls and not any((regex.match(_url) is not None) for regex in allowed_urls):
