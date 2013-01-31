@@ -30,6 +30,11 @@ def test_unescape_hex():
     assert unescape(entity) == u"\xa0"
 
 
+def test_unescape_invalid_hex():
+    entity = "&#xzz;"
+    assert unescape(entity) == entity
+
+
 def test_unescape_int():
     entity = "&#160;"
     assert unescape(entity) == u"\xa0"
