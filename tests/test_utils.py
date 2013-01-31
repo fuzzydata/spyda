@@ -25,8 +25,13 @@ def test_unescape(entity, expected):
     assert actual == expected
 
 
-def test_unescape_hash_x():
+def test_unescape_hex():
     entity = "&#xa0;"
+    assert unescape(entity) == u"\xa0"
+
+
+def test_unescape_int():
+    entity = "&#160;"
     assert unescape(entity) == u"\xa0"
 
 
