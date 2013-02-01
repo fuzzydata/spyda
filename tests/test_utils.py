@@ -1,4 +1,4 @@
-from spyda.utils import unichar_to_text, unescape, UNICHAR_REPLACEMENTS
+from spyda.utils import dict_to_text, unichar_to_text, unescape, UNICHAR_REPLACEMENTS
 
 
 TEST_ENTITIES = (
@@ -18,6 +18,12 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize(["entity", "expected"], TEST_ENTITIES)
     elif "unichar" in metafunc.fixturenames:
         metafunc.parametrize(["unichar", "expected"], TEST_UNICHARS)
+
+
+def test_dict_to_text():
+    d = {"foo": "bar"}
+    s = "foo: bar"
+    assert dict_to_text(d) == s
 
 
 def test_unescape(entity, expected):
