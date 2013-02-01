@@ -2,9 +2,6 @@ import re
 import htmlentitydefs
 
 
-from url import parse as parse_url
-
-
 UNICHAR_REPLACEMENTS = (
     (u"\xa0",   u" "),      # non breaking space
     (u"\u2018", u"`"),      # left single quote
@@ -16,12 +13,6 @@ UNICHAR_REPLACEMENTS = (
 
 def is_url(s):
     return s.find("://") > 0
-
-
-def url_to_path(url):
-    url = parse_url(url)
-    path = url.escape().utf8()
-    return path[(path.index("://") + 3):]
 
 
 def dict_to_text(d):
