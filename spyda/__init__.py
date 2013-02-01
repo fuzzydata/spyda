@@ -19,7 +19,6 @@ __version__ = "0.0.2dev"
 
 
 import sys
-from json import dumps
 from os import makedirs, path
 from functools import partial
 from collections import deque
@@ -37,14 +36,11 @@ from lxml.html import HtmlElement
 empty_doc = HtmlElement()
 del HtmlElement
 
-from .utils import unichar_to_text, unescape
+from .utils import is_url, unichar_to_text, unescape
 
 HEADERS = {
     "User-Agent": "{0} v{1}".format(__name__, __version__)
 }
-
-
-PROTOCOLS = ("http", "https", "ftp", "ftps",)
 
 
 try:
@@ -219,40 +215,10 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, output=None, 
     }
 
 
-def extract(source, filters=None, output=None, verbose=False):
+def extract(source, filters=None):
     filters = dict(filter.split("=") for filter in filters)
-
-    if any(source.lower().startswith(protocol) for protocol in PROTOCOLS):
-        response, content = fetch_url(source)
-        url = parse_url(source)
-    else:
-        response, content = None, open(source, "r").read()
-        url = None
-
-    doc = parse_html(content)
-
-    result = dict((k, unichar_to_text(unescape(doc_to_text((doc.cssselect(v) or [empty_doc])[0])))) for k, v in filters.items())
-
-    if output is not None and path.exists(output):
-        if url is not None:
-            filename = url.escape().utf8()
-            filename = filename[(filename.index("://") + 3):]
-        else:
-            filename = source
-
-        filepath = path.join(output, path.dirname(filename))
-        if not path.exists(filepath):
-            makedirs(filepath)
-
-        basename = path.basename(filename)
-        if not basename:
-            basename = "index.html"
-
-        fullpath = path.join(filepath, basename)
-
-        open(fullpath, "w").write(dumps(result))
-    else:
-        return result
+    content = fetch_url(source) if is_url(source) else open(source, "r").read()
+    return dict((k, unichar_to_text(unescape(doc_to_text((parse_html(content).cssselect(v) or [empty_doc])[0])))) for k, v in filters.items())
 
 
 __all__ = ("crawl", "fetch_url", "get_links",)
