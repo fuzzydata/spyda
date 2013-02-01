@@ -4,8 +4,10 @@ import htmlentitydefs
 
 UNICHAR_REPLACEMENTS = (
     (u"\xa0",   u" "),      # non breaking space
+    (u"\u2013", u"-"),      # en dash
     (u"\u2018", u"`"),      # left single quote
     (u"\u2019", u"'"),      # right single quote
+    (u"\u2026", u"..."),    # horizontal ellipsis
     (u"\u201c", u"\""),     # left double quote
     (u"\u201d", u"\""),     # right double quote
 )
