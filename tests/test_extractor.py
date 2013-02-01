@@ -3,9 +3,6 @@
 import pytest
 
 from os import path
-from json import loads
-
-from url import parse as parse_url
 
 from spyda import extract
 
@@ -51,29 +48,6 @@ def test_extract_file_null(sample_file):
     assert result == expected_result
 
 
-def test_extract_file_output(sample_file, filters, expected_result, tmpdir):
-    extract(sample_file, filters, output=str(tmpdir))
-    file = tmpdir.join(sample_file)
-    result = loads(file.read())
-    assert result == expected_result
-
-
 def test_extract_url(sample_url, filters, expected_result):
     result = extract(sample_url, filters)
-    assert result == expected_result
-
-
-def test_extract_url_output(sample_url, filters, expected_result, tmpdir):
-    extract(sample_url, filters, output=str(tmpdir))
-    filename = parse_url(sample_url).escape().utf8()
-    file = tmpdir.join(filename[(filename.index("://") + 3):])
-    result = loads(file.read())
-    assert result == expected_result
-
-
-def test_extract_url_index_output(sample_url_index, filters, expected_result, tmpdir):
-    extract(sample_url_index, filters, output=str(tmpdir))
-    filename = parse_url(sample_url_index).relative("index.html").escape().utf8()
-    file = tmpdir.join(filename[(filename.index("://") + 3):])
-    result = loads(file.read())
     assert result == expected_result
