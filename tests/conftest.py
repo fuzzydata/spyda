@@ -45,6 +45,10 @@ class Root(Controller):
     def hello(self):
         return "Hello World!"
 
+    def unicode(self):
+        self.response.headers["Content-Type"] = "text/plain; charset=utf-8"
+        return u"Hello World!"
+
     def external(self):
         return "<a href=\"http://www.google.com\">Google</a>"
 

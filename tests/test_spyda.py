@@ -52,6 +52,12 @@ def test_fetch_url(webapp):
     assert data == b"Hello World!"
 
 
+def test_fetch_url_unicode(webapp):
+    res, data = fetch_url(urljoin(webapp.server.base, "unicode"))
+    assert res.status == 200
+    assert data == u"Hello World!"
+
+
 def test_get_links(sample_content, sample_links):
     actual_links = list(get_links(sample_content))
     assert actual_links == sample_links
