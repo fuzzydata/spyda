@@ -19,7 +19,6 @@ __version__ = "0.0.2dev"
 
 
 import sys
-from functools import partial
 from collections import deque
 from traceback import format_exc
 from re import escape as escape_regex
@@ -42,10 +41,14 @@ HEADERS = {
 }
 
 
-try:
-    fetch_url = partial(GET, headers=HEADERS, resp=True)
-except:  # pragma: no cover
-    pass  # NOQA
+def fetch_url(url):
+    response, content = GET(url, headers=HEADERS, resp=True)
+    if "content-type" in response and "charset=" in response["content-type"]:
+        charset = response["content-type"].split("charset=")[1]
+    else:
+        charset = None
+
+    return response, (content.decode(charset) if charset is not None else content)
 
 
 def log(msg, *args, **kwargs):
@@ -66,8 +69,8 @@ def parse_html(html):
     return html_to_doc(html)
 
 
-def doc_to_text(doc, encoding="ascii"):
-    return html_to_text(doc_to_str(doc, encoding=encoding))
+def doc_to_text(doc):
+    return unichar_to_text(html_to_text(unescape(doc_to_str(doc))))
 
 
 def get_links(html, badchars="\"' \v\f\t\n\r"):
@@ -195,7 +198,15 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
 def extract(source, filters=None):
     filters = dict(filter.split("=") for filter in filters)
     content = fetch_url(source)[1] if is_url(source) else open(source, "r").read()
-    return dict((k, unichar_to_text(unescape(doc_to_text((parse_html(content).cssselect(v) or [empty_doc])[0])))) for k, v in filters.items())
+    result = {}
+    for k, filter in filters.items():
+        doc = parse_html(content)
+        doc = (doc.cssselect(filter) or [empty_doc])[0]
+        text = doc_to_text(doc)
+        result[k] = text
+    return result
+
+    #return dict((k, unichar_to_text(unescape(doc_to_text((parse_html(content).cssselect(v) or [empty_doc])[0])))) for k, v in filters.items())
 
 
 __all__ = ("crawl", "fetch_url", "get_links",)

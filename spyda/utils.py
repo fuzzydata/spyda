@@ -18,7 +18,8 @@ def is_url(s):
 
 
 def dict_to_text(d):
-    return "\n".join("{0:s}: {1:s}".format(k, v) for k, v in d.items())
+    #return "\n".join("{0:s}: {1:s}".format(k, v) for k, v in d.items())
+    return u"\n".join(u"{0:s}: {1:s}".format(k, v) for k, v in d.items())
 
 
 def unescape(text):
