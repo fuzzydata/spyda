@@ -1,14 +1,11 @@
 try:
     from calais import Calais
-except ImportError:
+except ImportError:  # pragma: no cover
     Calais = None  # NOQA
 
 
 if Calais is not None:
-    def process_calais(content, key=None):
-        if key is None:
-            return {}
-
+    def process_calais(content, key):
         calais = Calais(key)
         response = calais.analyze(content)
 
