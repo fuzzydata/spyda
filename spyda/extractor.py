@@ -111,9 +111,13 @@ def parse_options():
 
 def job(opts, source):
     opts.verbose and log("Processing: {0:s}", source)
+
     result = extract(source, opts.filters)
+
     if Calais is not None and opts.calais:
         result.update(process_calais(dict_to_text(result), key=opts.calais_key))
+
+    result["_source"] = source
 
     if opts.output is not None:
         with open(path.join(opts.output, "{0:s}.json".format(uuid())), "w") as f:
