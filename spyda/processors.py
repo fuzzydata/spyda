@@ -9,6 +9,6 @@ if Calais is not None:
         calais = Calais(key)
         response = calais.analyze(content)
 
-        people = [entity["name"] for entity in response.entities if entity["_type"] == "Person"]
+        people = [entity["name"] for entity in getattr(response, "entities", []) if entity["_type"] == "Person"]
 
         return {"people": people}
