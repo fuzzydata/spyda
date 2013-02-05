@@ -152,7 +152,7 @@ def main():
         sources = [source for source, tries in retries.items() if tries < 3]
 
     opts.verbose and log("Error(s):")
-    (log(source) for source, tries in retries.items() if tries >= 3)
+    [log(source) for source, tries in retries.items() if tries >= 3]
 
     cputime = clock()
     duration = time() - stime
