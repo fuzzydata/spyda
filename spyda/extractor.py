@@ -8,6 +8,7 @@ from os import environ, path
 from time import clock, time
 from functools import partial
 from uuid import uuid4 as uuid
+from collections import defaultdict
 from multiprocessing.pool import ThreadPool
 from optparse import OptionGroup, OptionParser
 
@@ -110,20 +111,25 @@ def parse_options():
 
 
 def job(opts, source):
-    opts.verbose and log("Processing: {0:s}", source)
+    try:
+        opts.verbose and log("Processing: {0:s}", source)
 
-    result = extract(source, opts.filters)
+        result = extract(source, opts.filters)
 
-    if Calais is not None and opts.calais:
-        result.update(process_calais(dict_to_text(result), key=opts.calais_key))
+        if Calais is not None and opts.calais:
+            result.update(process_calais(dict_to_text(result), key=opts.calais_key))
 
-    result["_source"] = source
+        result["_source"] = source
 
-    if opts.output is not None:
-        with open(path.join(opts.output, "{0:s}.json".format(uuid())), "w") as f:
-            f.write(dumps(result))
-    else:
-        print(dumps(result))
+        if opts.output is not None:
+            with open(path.join(opts.output, "{0:s}.json".format(uuid())), "w") as f:
+                f.write(dumps(result))
+        else:
+            print(dumps(result))
+        return True, source
+    except Exception as e:
+        log("Error Processing {0:s} {1:s}", source, e)
+        return False, source
 
 
 def main():
@@ -133,20 +139,25 @@ def main():
 
     stime = time()
 
-    if source == "-":
-        sources = (line.strip() for line in sys.stdin)
-    else:
-        sources = (source,)
+    sources = (line.strip() for line in sys.stdin) if source == "-" else (source,)
 
     pool = ThreadPool(opts.jobs)
 
-    pool.map(partial(job, opts), sources)
+    retries = defaultdict(int)
 
-    if opts.verbose:
-        cputime = clock()
-        duration = time() - stime
+    while sources:
+        results = pool.map(partial(job, opts), sources)
+        [retries.pop(source, None) for success, source in results if success]
+        retries.update((source, (retries[source] + 1)) for success, source in results if not success)
+        sources = [source for source, tries in retries.items() if tries < 3]
 
-        log("Processed in in {0:0.2f}s using {1:0.2f}s of CPU time.".format(duration, cputime))
+    opts.verbose and log("Error(s):")
+    (log(source) for source, tries in retries.items() if tries >= 3)
+
+    cputime = clock()
+    duration = time() - stime
+
+    opts.verbose and log("Processed in in {0:0.2f}s using {1:0.2f}s of CPU time.", duration, cputime)
 
 
 if __name__ == "__main__":
