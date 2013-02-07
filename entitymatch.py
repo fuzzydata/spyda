@@ -2,18 +2,21 @@
 
 from os import path
 from glob import glob
-from sys import stderr
 from json import loads
 from operator import itemgetter
 
-from utils import csv_to_dictlist, get_close_matches
+from utils import get_close_matches
 
 
-researchers = dict((" ".join([x.strip() for x in researcher["label"].split(" ") if x]), researcher["id"]) for researcher in csv_to_dictlist("researchers.csv"))
-names = researchers.keys()
-common_names = dict((" ".join(itemgetter(0, -1)(k.split(" "))), v) for k, v in researchers.items())
+records = loads(open("data.json", "rb").read())
 
-potential_mismatches = []
+
+cutoff = 0.85
+
+id = "uri"
+keys = [("preferred_name", "family_name"), ("given_name", "family_name")]
+namesets = list(dict(("{0:s} {1:s}".format(*itemgetter(*k)(record)), record[id]) for record in records) for k in keys)
+
 
 for filename in glob("./tmp/*.json"):
     with open(filename, "r") as f:
@@ -32,49 +35,15 @@ for filename in glob("./tmp/*.json"):
 
         matched_researchers = []
 
-        import pudb; pudb.set_trace()
-
         for person in people:
-            matches = get_close_matches(person, names, cutoff=0.80)
-            match, score = matches[0] if matches else None, None
-            if match is not None:
-                matched_researchers.append((match, score, researchers[match]))
-                continue
-
-            matches = get_close_matches(person, common_names, cutoff=0.80)
-            match, score = matches[0] if matches else None, None
-            if match is not None:
-                matched_researchers.append((match, score, common_names[match]))
-                continue
-
-            tokens = [x.strip() for x in person.split(" ") if x]
-            if len(tokens) > 2:
-                person = " ".join(itemgetter(0, -1)(tokens))
-
-                matches = get_close_matches(person, names, cutoff=0.80)
-                match, score = matches[0] if matches else None, None
+            for nameset in namesets:
+                matches = get_close_matches(person, nameset.keys(), cutoff=cutoff)
+                match, score = matches[0] if matches else (None, None)
                 if match is not None:
-                    matched_researchers.append((match, score, researchers[match]))
-                    continue
-
-                matches = get_close_matches(person, common_names, cutoff=0.80)
-                match, score = matches[0] if matches else None, None
-                if match is not None:
-                    matched_researchers.append((match, score, common_names[match]))
-                    continue
+                    matched_researchers.append((match, score, nameset[match]))
+                    break
 
         if matched_researchers:
             print(" Researchers:")
-            print("\n".join(["  {0:s} ({1:0.2f}%) ({1:s})".format(match, score, id) for match, score, id in matched_researchers]))
-        else:
-            matches = [(person, get_close_matches(person, names, cutoff=0.5)) for person in people]
-            potential_mismatches.append((article_id, data["_source"], matches))
-        print
-
-print >> stderr, "Potential Mismatched Articles:"
-for article_id, source, people in potential_mismatches:
-    if people:
-        print >> stderr, " Article ID: {0:s}".format(article_id)
-        print >> stderr, " Source: {0:s}".format(source)
-        print >> stderr, " People:"
-        print >> stderr, "\n".join(["  {0:s} ({1:s})".format(person, repr(matches)) for person, matches in people])
+            print("\n".join(["  {0:s} ({1:0.2f}%) ({2:s})".format(match, (score * 100.0), id) for match, score, id in matched_researchers]))
+    print
