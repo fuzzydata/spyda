@@ -22,7 +22,7 @@ try:
 except ImportError:
     Calais = None  # NOQA
 
-USAGE = "%prog [options] file | url | -"
+USAGE = "%prog [options] [file | url | -]"
 VERSION = "%prog v" + __version__
 DESCRIPTION = (
     "Tool to extract fragments of a given document by use of CSS Selector(s). "
