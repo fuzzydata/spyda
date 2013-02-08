@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from sys import argv
 from glob import glob
 from json import dumps, loads
 from operator import itemgetter
@@ -38,4 +39,4 @@ def job(filename):
 
 
 pool = Pool()
-pool.map(job, glob("./tmp/*.json"))
+pool.map(job, glob(argv[1]))
