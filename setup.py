@@ -61,6 +61,7 @@ setup(
         "console_scripts": [
             "crawl=spyda.crawler:main",
             "extract=spyda.extractor:main"
+            "match=spyda.matcher:main"
         ]
     },
     zip_safe=False,
