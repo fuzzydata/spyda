@@ -60,7 +60,7 @@ setup(
     entry_points={
         "console_scripts": [
             "crawl=spyda.crawler:main",
-            "extract=spyda.extractor:main"
+            "extract=spyda.extractor:main",
             "match=spyda.matcher:main"
         ]
     },
