@@ -30,6 +30,12 @@ def parse_options():
     parser = OptionParser(description=DESCRIPTION, usage=USAGE, version=VERSION)
 
     parser.add_option(
+        "-c", "--cutoff",
+        action="store", type="float", metavar="NUM", default=0.85, dest="cutoff",
+        help="A cutoff in range [0.0, 1.0] affecting the closness of matches."
+    )
+
+    parser.add_option(
         "-m", "--match-keys",
         action="append", type="string", metavar="MATCH-KEYS", default=None, dest="match_keys",
         help="A comma separated list of keys to match against"
@@ -76,12 +82,14 @@ def parse_options():
         parser.print_help()
         raise SystemExit(1)
 
+    opts.match_keys = list(tuple((x.strip() for x in match_key.split(",") if x)) for match_key in opts.match_keys)
+
     return opts, args
 
 
 def build_datasets(opts, source):
     records = loads(fetch_url(source)[1] if is_url(source) else open(source, "rb").read())
-    return list(dict(("{0:s} {1:s}".format(*itemgetter(*keys)(record)), record[opts.uri_key]) for record in records) for keys in opts.match_keyset)
+    return list(dict(("{0:s} {1:s}".format(*itemgetter(*keys)(record)), record[opts.uri_key]) for record in records) for keys in opts.match_keys)
 
 
 def job(opts, datasets, source):
@@ -114,7 +122,7 @@ def job(opts, datasets, source):
 def main():
     opts, args = parse_options()
 
-    datasets = build_datasets(args[0])
+    datasets = build_datasets(opts, args[0])
     sources = glob(args[1])
 
     stime = time()
