@@ -9,7 +9,7 @@ from multiprocessing.pool import Pool
 from utils import get_close_matches
 
 
-records = loads(open("data.json", "rb").read())
+records = loads(open(argv[1], "rb").read())
 
 
 cutoff = 0.85
@@ -39,4 +39,4 @@ def job(filename):
 
 
 pool = Pool()
-pool.map(job, glob(argv[1]))
+pool.map(job, glob(argv[2]))
