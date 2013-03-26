@@ -66,13 +66,6 @@ def unichar_to_text(text):
     return text
 
 
-def csv_to_dictlist(csvfile):
-    with open(csvfile, "rb") as f:
-        dialect = Sniffer().sniff(f.read(1024))
-        f.seek(0)
-        return list(dict((k.strip(), v.strip()) for k, v in d.items()) for d in DictReader(f, dialect=dialect))
-
-
 def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     """Use SequenceMatcher to return list of close matches.
 
