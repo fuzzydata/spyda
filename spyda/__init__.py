@@ -4,11 +4,10 @@
 
 """Spyda - Python Spider Tool and Library
 
-spyda is a simple tool and library written in the `Python Programming Language`_ to crawl a given url whilst allowing you to restrict results to a specified
-domain and optionally also perform pattern matching against urls crawled. spyda will report on any urls it was unable to crawl along with their status code
-and store successfully cralwed links and their content in a directory structure that matches the domain and urls searched.
+spyda is a set of tools and a library written in the `Python Programming Language`_
+for web crawling, article extraction entity matching and rdf graog geberatuib.
 
-:copyright: CopyRight (C) 2012 by James Mills
+:copyright: CopyRight (C) 2012-2013 by James Mills
 
 .. _Python Programming Language: http://www.python.org/
 """
@@ -195,18 +194,11 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
     }
 
 
-def extract(source, filters=None):
+def extract(source, filters):
     filters = dict(filter.split("=") for filter in filters)
-    content = fetch_url(source)[1] if is_url(source) else open(source, "r").read()
-    result = {}
-    for k, filter in filters.items():
-        doc = parse_html(content)
-        doc = (doc.cssselect(filter) or [empty_doc])[0]
-        text = doc_to_text(doc)
-        result[k] = text
-    return result
+    s = fetch_url(source)[1] if is_url(source) else open(source, "r").read()
 
-    #return dict((k, unichar_to_text(unescape(doc_to_text((parse_html(content).cssselect(v) or [empty_doc])[0])))) for k, v in filters.items())
+    return dict((k, doc_to_text((parse_html(s).cssselect(v) or [empty_doc])[0])) for k, v in filters.items())
 
 
 __all__ = ("crawl", "fetch_url", "get_links",)
