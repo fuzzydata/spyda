@@ -71,7 +71,9 @@ def main():
     if result["errors"]:
         if opts.verbose:
             print >> sys.stderr, "Error(s):"
-        print >> sys.stderr, "\n".join(" {0:d} {1:s}".format(*url) for url in result["errors"])
+        print >> sys.stderr, "\n".join(
+            " {0:d} {1:s}".format(*url) for url in result["errors"]
+        )
 
     if opts.verbose:
         cputime = clock()
@@ -79,7 +81,11 @@ def main():
         urls = len(result["urls"])
         urls_per_second = int(urls / duration)
 
-        print("{0:d} urls found in {1:0.2f}s ({2:d}/s) using {3:0.2f}s of CPU time.".format(urls, duration, urls_per_second, cputime))
+        print(
+            "{0:d} urls in {1:0.2f}s ({2:d}/s) CPU: {3:0.2f}s".format(
+                urls, duration, urls_per_second, cputime
+            )
+        )
 
 if __name__ == "__main__":
     main()
