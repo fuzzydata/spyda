@@ -210,6 +210,8 @@ class WebCrawler(Component):
 
     def process(self, links):
         for link in links:
+            yield
+
             if link in self.urls:
                 self.verbose and log("  (S): {0}", link)
                 continue
@@ -228,12 +230,13 @@ class WebCrawler(Component):
 
             if self.patterns and not any((regex.match(link) is not None)
                                          for regex in self.patterns):
+                self.visited.append(link)
                 self.verbose and log("  (P): {0}", link)
-            else:
-                self.verbose and log("  (F): {0}", link)
-                self.urls.append(link)
-                self.l += 1
-            yield
+                continue
+
+            self.verbose and log("  (F): {0}", link)
+            self.urls.append(link)
+            self.l += 1
 
     @handler("task_success", channel="*")
     def _on_task_success(self, event, evt, value):
