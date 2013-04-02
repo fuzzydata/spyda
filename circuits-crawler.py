@@ -247,17 +247,17 @@ class WebCrawler(Component):
     def _on_generate_events(self, event):
         event.reduce_time_left(0)
 
-        if self.queue:
+        while self.queue:
             self.fire(Fetch(self.queue.popleft()))
-        else:
-            if sum([len(self.queue), len(self._queue), len(self._tasks)]) == 0:
-                raise SystemExit(0)
+
+        if sum([len(self._queue), len(self._tasks)]) == 0:
+            raise SystemExit(0)
 
         if not self.verbose:
             status(
-                "Q: {0:>3d} T: {1:>3d} F: {2:>4d} V: {3:>4d} L: {4:>4d}",
-                len(self.queue), len(self._tasks),
-                self.n, len(self.visited), self.l
+                "F: {0:>4d} V: {1:>4d} L: {2:>4d} E: {3:3>d} T: {4:3>d}".format(
+                    self.n, len(self.visited), self.l, len(self._queue), len(self._tasks)
+                )
             )
 
 
