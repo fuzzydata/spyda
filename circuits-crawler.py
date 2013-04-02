@@ -161,7 +161,7 @@ class WebCrawler(Component):
         self.n += 1
         self.visited.append(url)
 
-        channel = uuid()
+        channel = uuid().hex
         client = Client(channel=channel).register(self)
         yield self.wait("ready", channel)
 
