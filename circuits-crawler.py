@@ -261,6 +261,8 @@ def main():
         Debugger().register(crawler)
     crawler.run()
 
+    print
+
     if crawler.urls:
         if opts.verbose:
             print("URL(s):")
