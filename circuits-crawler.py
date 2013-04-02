@@ -102,7 +102,7 @@ def get_links(url, html, badchars="\"' \v\f\t\n\r"):
     tags = parse_html(html).cssselect("a")
     hrefs = (tag.get("href") for tag in tags)
     links = (href.strip(badchars) for href in hrefs if href is not None)
-    urls = (_url.relative(link) for link in links)
+    urls = set(sorted(_url.relative(link) for link in links))
     return [url.sanitize().defrag().canonical().utf8()
             for url in urls
             if url._scheme in ("http", "https")]
