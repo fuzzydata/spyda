@@ -214,10 +214,6 @@ class WebCrawler(Component):
                 self.verbose and log("  (S): {0}", link)
                 continue
 
-            if parse_url(link)._scheme not in ("http", "https"):
-                self.verbose and log("  (I): {0}", link)
-                continue
-
             if link in self.visited:
                 self.verbose and log("  (V): {0}", link)
                 continue
