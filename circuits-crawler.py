@@ -89,8 +89,7 @@ def get_links(url, html, badchars="\"' \v\f\t\n\r"):
     _url = parse_url(url)
     tags = parse_html(html).cssselect("a")
     hrefs = (tag.get("href") for tag in tags)
-    return [_url.relative(href.strip(badchars))
-            .sanitize().defrag().canonical().utf8()
+    return [_url.relative(href.strip(badchars)).utf8()
             for href in hrefs if href is not None]
 
 
