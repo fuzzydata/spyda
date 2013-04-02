@@ -14,6 +14,12 @@ from optparse import OptionParser
 from re import escape as escape_regex
 from re import compile as compile_regex
 
+try:
+    import hotshot
+    import hotshot.stats
+except ImportError:
+    hostshot = None
+
 from url import parse as parse_url
 from lxml.html.soupparser import fromstring as html_to_doc
 
@@ -47,6 +53,12 @@ def parse_options():
         "-p", "--pattern",
         action="append", default=None, dest="patterns",
         help="URL pattern to match (multiple allowed)."
+    )
+
+    parser.add_option(
+        "", "--profile",
+        action="store_true", default=False, dest="profile",
+        help="Enable execution profiling support"
     )
 
     parser.add_option(
@@ -113,7 +125,7 @@ class WebCrawler(Component):
     channel = "crawler"
 
     def init(self, url, allowed_urls=None, max_depth=0, patterns=None,
-             verbose=0, channel=channel):
+             verbose=0, profile=False, channel=channel):
         self.url = url
 
         if not allowed_urls:
@@ -262,9 +274,21 @@ def main():
     crawler = WebCrawler(url, **opts.__dict__)
     if opts.verbose > 1:
         Debugger().register(crawler)
+
+    if opts.profile and hotshot:
+        profiler = hotshot.Profile(".profile")
+        profiler.start()
+
     crawler.run()
 
-    print
+    if opts.profile and hotshot:
+        profiler.stop()
+        profiler.close()
+
+        stats = hotshot.stats.load(".profile")
+        stats.strip_dirs()
+        stats.sort_stats("time", "calls")
+        stats.print_stats(20)
 
     if crawler.urls:
         if opts.verbose:
