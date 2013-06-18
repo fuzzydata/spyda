@@ -17,7 +17,7 @@ setup(
     author="James Mills",
     author_email="James Mills, j dot mills at griffith dot edu dot au",
     url="https://bitbucket.org/prologic/spyda",
-    download_url="https://bitbucket.org/prologic/spyda/downloads/get/tip.zip"
+    download_url="https://bitbucket.org/prologic/spyda/downloads/get/tip.zip",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
