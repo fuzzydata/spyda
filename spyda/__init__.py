@@ -14,7 +14,8 @@ for web crawling, article extraction entity matching and rdf graog geberatuib.
 
 __author__ = "James Mills, j dot mills at griffith dot edu dot au"
 __date__ = "9th January 2013"
-__version__ = "0.0.2dev"
+version_info = ("0", "0", "2", "dev")
+__version__ = version = ".".join(version_info)
 
 
 import sys
