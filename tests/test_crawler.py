@@ -27,7 +27,19 @@ def test_crawl(webapp, expected_links):
 
 
 def test_crawl_allowed_urls(webapp):
-    result = crawl(urljoin(webapp.server.base, "external"), allowed_urls=["^http\:\/\/localhost.*"])
+    result = crawl(urljoin(webapp.server.base, "external"), blacklist=[".*"], allowed_urls=["^http\:\/\/localhost.*"])
+    assert not result["urls"]
+    assert not result["errors"]
+
+
+def test_crawl_blacklist(webapp):
+    result = crawl(webapp.server.base, blacklist=[".*"])
+    assert not result["urls"]
+    assert not result["errors"]
+
+
+def test_crawl_whitelist(webapp):
+    result = crawl(urljoin(webapp.server.base, "external"), blacklist=[".*"], allowed_urls=["^http\:\/\/localhost.*"])
     assert not result["urls"]
     assert not result["errors"]
 

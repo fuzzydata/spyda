@@ -19,9 +19,9 @@ __version__ = version = ".".join(version_info)
 
 
 import sys
+from warnings import warn
 from collections import deque
 from traceback import format_exc
-from re import escape as escape_regex
 from re import compile as compile_regex
 
 from restclient import GET
@@ -79,7 +79,7 @@ def get_links(html, badchars="\"' \v\f\t\n\r"):
     return (href.strip(badchars) for href in hrefs if href is not None)
 
 
-def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False):
+def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=None, verbose=False, whitelist=None):
     """Crawl a given url recursively for urls.
 
     :param root_url: Root URL to start crawling from.
@@ -89,6 +89,9 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                          By default a regex is compiled for the ``root_url`` and used.
     :type  allowed_urls: list or None
 
+    :param blacklist: A list of blacklisted urls (matched by regex) to not traverse.
+    :type  blacklist: list or None
+
     :param max_depth: Maximum depth to follow, 0 for unlimited depth.
     :param max_depth: int
 
@@ -97,6 +100,9 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
 
     :param verbose: If ``True`` will print verbose logging
     :param verbose: bool
+
+    :param whitelist: A list of whitelisted urls (matched by regex) to traverse.
+    :type  whitelist: list or None
 
     :returns: A dict in the form {"error": set(...), "urls": set(...)}
               The errors set contains 2-item tuples of (status, url)
@@ -109,12 +115,21 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
      - (S) (S)een this URL before
      - (E) (E)rror fetching URL
      - (V) URL already (V)isitied
-     - (O) URL (O)utside allowed domains
+     - (B) URL blacklisted
+     - (W) URL whitelisted
 
     Also in verbose mode each followed URL is printed in the form:
     <status> <reason> <type> <length> <link> <url>
+
+    .. deprecated:: 0.0.2
+       The ``allowed_url`` parameter has been deprecated in favor of two additional parameters
+       ``blacklist`` and ``whitelist``.
+
+    .. versionadded:: 0.0.2
+       ``blacklist`` and ``whitelist`` control a regex matched pattern of urls to traverse.
     """
 
+    blacklist = [compile_regex(regex) for regex in blacklist] if blacklist else []
     patterns = [compile_regex(regex) for regex in patterns] if patterns else []
     root_url = parse_url(root_url)
     queue = deque([root_url])
@@ -124,10 +139,13 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
     n = 0
     l = 0
 
-    if not allowed_urls:
-        allowed_urls = ["^{0:s}.*(?is)".format(escape_regex(root_url.utf8()))]
+    # XXX: Remove this block in spyda>0.0.2
+    if allowed_urls:
+        warn("The use of the ``allowed_urls`` parameter is deprecated. Please use ``whitelist`` instead.", category=DeprecationWarning)
+        if whitelist:
+            whitelist.extend(allowed_urls)
 
-    allowed_urls = [compile_regex(regex) for regex in allowed_urls]
+    whitelist = [compile_regex(regex) for regex in whitelist] if whitelist else []
 
     while queue:
         try:
@@ -170,12 +188,16 @@ def crawl(root_url, allowed_urls=None, max_depth=0, patterns=None, verbose=False
                     verbose and log("  (V): {0}", _url)
                     continue
 
-                if allowed_urls and not any((regex.match(_url) is not None) for regex in allowed_urls):
-                    visited.append(_url)
-                    verbose and log("  (O): {0}", _url)
-                    continue
-
-                queue.append(url)
+                if blacklist and any((regex.match(_url) is not None) for regex in blacklist):
+                    if whitelist and any((regex.match(_url) is not None) for regex in whitelist):
+                        queue.append(url)
+                        verbose and log("  (W): {0}", _url)
+                    else:
+                        visited.append(_url)
+                        verbose and log("  (B): {0}", _url)
+                        continue
+                else:
+                    queue.append(url)
 
                 if patterns and not any((regex.match(_url) is not None) for regex in patterns):
                     verbose and log("  (P): {0}", _url)

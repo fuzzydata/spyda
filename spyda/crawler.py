@@ -3,6 +3,7 @@
 """Web Crawler Tool"""
 
 import sys
+from warnings import warn
 from time import clock, time
 from optparse import OptionParser
 
@@ -16,10 +17,17 @@ VERSION = "%prog v" + __version__
 def parse_options():
     parser = OptionParser(usage=USAGE, version=VERSION)
 
+    # XXX: Remove this block in spyda>0.0.2
     parser.add_option(
         "-a", "--allowed_url",
         action="append", default=None, dest="allowed_urls",
-        help="Allowed url to traverse (multiple allowed)."
+        help="(@deprecated) Allowed url to traverse (multiple allowed)."
+    )
+
+    parser.add_option(
+        "-b", "--blacklist",
+        action="append", default=None, dest="blacklist",
+        help="Blacklisted URL to not traverse (multiple allowed)."
     )
 
     parser.add_option(
@@ -40,11 +48,21 @@ def parse_options():
         help="Enable verbose logging"
     )
 
+    parser.add_option(
+        "-w", "--whitelist",
+        action="append", default=None, dest="whitelist",
+        help="Whitelisted URL to traverse (multiple allowed)."
+    )
+
     opts, args = parser.parse_args()
 
     if len(args) < 1:
         parser.print_help()
         raise SystemExit(1)
+
+    # XXX: Remove this block in spyda>0.0.2
+    if opts.allowed_urls:
+        warn("The use of the ``-a/--allowed_url`` option is deprecated. Please use ``-w/--whitelist`` instead.", category=DeprecationWarning)
 
     return opts, args
 
