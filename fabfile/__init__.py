@@ -52,13 +52,12 @@ def develop():
 
 
 @task()
-@requires(modules=("pytest",))
+@requires("py.test")
 def test(*args):
     """Run all unit tests and doctests."""
 
     default_args = ["-x", "-s", "-r", "fsxX"]
 
-    args = default_args + list(args)
+    args = default_args + list(args) + ["tests"]
 
-    import pytest
-    pytest.main(args)
+    local("py.test {0:s}".format(" ".join(args)))
