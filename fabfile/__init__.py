@@ -4,7 +4,7 @@
 
 """Fabric fabfile"""
 
-from fabric.api import execute, hide, local, path, settings, task
+from fabric.api import execute, hide, local, settings, task
 
 import docs  # noqa
 
