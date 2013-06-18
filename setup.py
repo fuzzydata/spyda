@@ -49,10 +49,14 @@ setup(
     platforms="POSIX",
     packages=find_packages("."),
     scripts=glob("scripts/*"),
+    dependency_links=[
+        "https://bitbucket.org/prologic/calais/get/tip.zip#egg=calais-dev"
+    ],
     install_requires=[
         "url",
         "lxml",
         "nltk",
+        "calais",
         "cssselect",
         "restclient",
         "BeautifulSoup"
