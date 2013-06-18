@@ -30,10 +30,6 @@ from nltk import clean_html as html_to_text
 from lxml.html import tostring as doc_to_str
 from lxml.html.soupparser import fromstring as html_to_doc
 
-from lxml.html import HtmlElement
-empty_doc = HtmlElement()
-del HtmlElement
-
 from .utils import is_url, unichar_to_text, unescape
 
 HEADERS = {
@@ -220,8 +216,16 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
 def extract(source, filters):
     filters = dict(filter.split("=") for filter in filters)
     s = fetch_url(source)[1] if is_url(source) else open(source, "r").read()
+    doc = parse_html(s)
 
-    return dict((k, doc_to_text((parse_html(s).cssselect(v) or [empty_doc])[0])) for k, v in filters.items())
+    result = {}
+    for k, v in filters.items():
+        e = (doc.cssselect(v) or [None])[0]
+        html = doc_to_str(e) if e is not None else ""
+        text = doc_to_text(e) if e is not None else ""
+        result["_{0:s}".format(k)] = html
+        result[k] = text
+    return result
 
 
 __all__ = ("crawl", "fetch_url", "get_links",)

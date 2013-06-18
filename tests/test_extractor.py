@@ -32,7 +32,12 @@ def filters(request):
 
 @pytest.fixture()
 def expected_result(request):
-    return {"title": "Test Article", "content": "James Mills says \"Hello World!\""}
+    return {
+        "title": "Test Article",
+        "_title": """<p class="title">Test Article</p>\n""",
+        "content": "James Mills says \"Hello World!\"",
+        "_content": """<div id="content">\n<p>James Mills says "Hello World!"</p>\n</div>\n""",
+    }
 
 
 def test_extract_file(sample_file, filters, expected_result):
@@ -42,7 +47,7 @@ def test_extract_file(sample_file, filters, expected_result):
 
 def test_extract_file_null(sample_file):
     filters = ("foo=bar",)
-    expected_result = {"foo": ""}
+    expected_result = {"foo": "", "_foo": ""}
 
     result = extract(sample_file, filters)
     assert result == expected_result
