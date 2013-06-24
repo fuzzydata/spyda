@@ -12,11 +12,7 @@ for web crawling, article extraction entity matching and rdf graog geberatuib.
 .. _Python Programming Language: http://www.python.org/
 """
 
-__author__ = "James Mills, j dot mills at griffith dot edu dot au"
-__date__ = "9th January 2013"
-version_info = ("0", "0", "2", "dev")
-__version__ = version = ".".join(version_info)
-
+exec(compile(open("_version.py").read(), "_version.py", 'exec'))
 
 import sys
 from warnings import warn

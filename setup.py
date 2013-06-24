@@ -4,13 +4,12 @@ from glob import glob
 
 from setuptools import setup, find_packages
 
-import spyda as pkg
-
+exec(compile(open("spyda/_version.py").read(), "spyda/_version.py", 'exec'))
 
 setup(
-    name=pkg.__name__,
-    version=pkg.__version__,
-    description=pkg.__doc__.split("\n")[0],
+    name="spyda",
+    version=__version__,
+    description="Spyda - Python Spider Tool and Library",
     long_description="{0:s}\n\n{1:s}".format(
         open("README.rst").read(), open("RELEASE.rst").read()
     ),
