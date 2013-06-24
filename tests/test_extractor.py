@@ -4,7 +4,7 @@ import pytest
 
 from os import path
 
-from spyda import extract
+from spyda.extractor import extract
 
 from .helpers import urljoin
 

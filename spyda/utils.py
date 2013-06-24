@@ -1,7 +1,27 @@
+# Module:   utils
+# Date:     18th December 2012
+# Author:   James Mills, j dot mills at griffith dot edu dot au
+
+"""Utilities"""
+
 import re
+import sys
 import htmlentitydefs
 from heapq import nlargest
+from traceback import format_exc
 from difflib import SequenceMatcher
+
+from restclient import GET
+from nltk import clean_html as html_to_text
+from lxml.html import tostring as doc_to_str
+from lxml.html.soupparser import fromstring as html_to_doc
+
+from . import __version__
+
+
+HEADERS = {
+    "User-Agent": "{0} v{1}".format(__name__, __version__)
+}
 
 
 UNICHAR_REPLACEMENTS = (
@@ -91,3 +111,41 @@ def get_close_matches(word, possibilities, n=3, cutoff=0.6):
 
     # Return n largest best scorers and their matches.
     return nlargest(n, result)
+
+
+def fetch_url(url):
+    response, content = GET(url, headers=HEADERS, resp=True)
+    if "content-type" in response and "charset=" in response["content-type"]:
+        charset = response["content-type"].split("charset=")[1]
+    else:
+        charset = None
+
+    return response, (content.decode(charset) if charset is not None else content)
+
+
+def log(msg, *args, **kwargs):
+    sys.stderr.write("{0:s}{1:s}".format(msg.format(*args), kwargs.get("n", "\n")))
+    sys.stderr.flush()
+
+
+def error(e):  # pragma: no cover
+    log("ERROR: {0:s}", e)
+    log(format_exc())
+
+
+def status(msg, *args):
+    log("\r\x1b[K{0:s}", msg.format(*args), n="")
+
+
+def parse_html(html):
+    return html_to_doc(html)
+
+
+def doc_to_text(doc):
+    return unichar_to_text(html_to_text(unescape(doc_to_str(doc))))
+
+
+def get_links(html, badchars="\"' \v\f\t\n\r"):
+    tags = parse_html(html).cssselect("a")
+    hrefs = (tag.get("href") for tag in tags)
+    return (href.strip(badchars) for href in hrefs if href is not None)

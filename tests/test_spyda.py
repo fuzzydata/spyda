@@ -2,7 +2,7 @@
 
 import pytest
 
-from spyda import fetch_url, get_links
+from spyda.utils import fetch_url, get_links
 
 
 from .helpers import urljoin
