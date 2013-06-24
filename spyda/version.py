@@ -7,4 +7,4 @@
 So we only have to maintain version information in one place!
 """
 
-version_info = ("0", "0", "2", "dev")
+version_info = ("0", "0", "3", "dev")
