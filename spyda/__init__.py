@@ -12,7 +12,9 @@ for web crawling, article extraction entity matching and rdf graog geberatuib.
 .. _Python Programming Language: http://www.python.org/
 """
 
-exec(compile(open("_version.py").read(), "_version.py", 'exec'))
+from _version import __author__
+from _version import __date__
+from _version import __version__
 
 import sys
 from warnings import warn
