@@ -1,30 +1,76 @@
-#!/usr/bin/env python
-# Module:   cralser
+# Package:  spyda
 # Date:     18th December 2012
 # Author:   James Mills, j dot mills at griffith dot edu dot au
 
-"""Crawler"""
+"""Spyda - Python Spider Tool and Library
+
+spyda is a set of tools and a library written in the `Python Programming Language`_
+for web crawling, article extraction entity matching and rdf graog geberatuib.
+
+:copyright: CopyRight (C) 2012-2013 by James Mills
+
+.. _Python Programming Language: http://www.python.org/
+"""
+
+from _version import __author__
+from _version import __date__
+from _version import __version__
 
 import sys
 from warnings import warn
-from time import clock, time
-from optparse import OptionParser
-
 from collections import deque
+from traceback import format_exc
 from re import compile as compile_regex
 
+from restclient import GET
 from url import parse as parse_url
+from nltk import clean_html as html_to_text
+from lxml.html import tostring as doc_to_str
+from lxml.html.soupparser import fromstring as html_to_doc
 
-from . import __version__
-from .utils import error, fetch_url, get_links, log, status
-
-USAGE = "%prog [options] <url>"
-VERSION = "%prog v" + __version__
-
+from .utils import is_url, unichar_to_text, unescape
 
 HEADERS = {
     "User-Agent": "{0} v{1}".format(__name__, __version__)
 }
+
+
+def fetch_url(url):
+    response, content = GET(url, headers=HEADERS, resp=True)
+    if "content-type" in response and "charset=" in response["content-type"]:
+        charset = response["content-type"].split("charset=")[1]
+    else:
+        charset = None
+
+    return response, (content.decode(charset) if charset is not None else content)
+
+
+def log(msg, *args, **kwargs):
+    sys.stderr.write("{0:s}{1:s}".format(msg.format(*args), kwargs.get("n", "\n")))
+    sys.stderr.flush()
+
+
+def error(e):  # pragma: no cover
+    log("ERROR: {0:s}", e)
+    log(format_exc())
+
+
+def status(msg, *args):
+    log("\r\x1b[K{0:s}", msg.format(*args), n="")
+
+
+def parse_html(html):
+    return html_to_doc(html)
+
+
+def doc_to_text(doc):
+    return unichar_to_text(html_to_text(unescape(doc_to_str(doc))))
+
+
+def get_links(html, badchars="\"' \v\f\t\n\r"):
+    tags = parse_html(html).cssselect("a")
+    hrefs = (tag.get("href") for tag in tags)
+    return (href.strip(badchars) for href in hrefs if href is not None)
 
 
 def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=None, verbose=False, whitelist=None):
@@ -165,96 +211,19 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
     }
 
 
-def parse_options():
-    parser = OptionParser(usage=USAGE, version=VERSION)
+def extract(source, filters):
+    filters = dict(filter.split("=") for filter in filters)
+    s = fetch_url(source)[1] if is_url(source) else open(source, "r").read()
+    doc = parse_html(s)
 
-    # XXX: Remove this block in spyda>0.0.2
-    parser.add_option(
-        "-a", "--allowed_url",
-        action="append", default=None, dest="allowed_urls",
-        help="(@deprecated) Allowed url to traverse (multiple allowed)."
-    )
-
-    parser.add_option(
-        "-b", "--blacklist",
-        action="append", default=None, dest="blacklist",
-        help="Blacklisted URL to not traverse (multiple allowed)."
-    )
-
-    parser.add_option(
-        "-d", "--max_depth",
-        action="store", type=int, default=0, dest="max_depth",
-        help="Maximum depth to follow (0 for unlimited)"
-    )
-
-    parser.add_option(
-        "-p", "--pattern",
-        action="append", default=None, dest="patterns",
-        help="URL pattern to match (multiple allowed)."
-    )
-
-    parser.add_option(
-        "-v", "--verbose",
-        action="store_true", default=False, dest="verbose",
-        help="Enable verbose logging"
-    )
-
-    parser.add_option(
-        "-w", "--whitelist",
-        action="append", default=None, dest="whitelist",
-        help="Whitelisted URL to traverse (multiple allowed)."
-    )
-
-    opts, args = parser.parse_args()
-
-    if len(args) < 1:
-        parser.print_help()
-        raise SystemExit(1)
-
-    # XXX: Remove this block in spyda>0.0.2
-    if opts.allowed_urls:
-        warn("The use of the ``-a/--allowed_url`` option is deprecated. Please use ``-w/--whitelist`` instead.", category=DeprecationWarning)
-
-    return opts, args
+    result = {}
+    for k, v in filters.items():
+        e = (doc.cssselect(v) or [None])[0]
+        html = doc_to_str(e) if e is not None else ""
+        text = doc_to_text(e) if e is not None else ""
+        result["_{0:s}".format(k)] = html
+        result[k] = text
+    return result
 
 
-def main():
-    opts, args = parse_options()
-
-    url = args[0]
-
-    if opts.verbose:
-        print("Crawling {0:s}".format(url))
-
-    stime = time()
-    result = crawl(url, **opts.__dict__)
-
-    if result["urls"]:
-        if opts.verbose:
-            print("URL(s):")
-        print("\n".join(result["urls"]))
-    else:
-        if opts.verbose:
-            print("No URL(s) found!")
-
-    if result["errors"]:
-        if opts.verbose:
-            print >> sys.stderr, "Error(s):"
-        print >> sys.stderr, "\n".join(
-            " {0:d} {1:s}".format(*url) for url in result["errors"]
-        )
-
-    if opts.verbose:
-        cputime = clock()
-        duration = time() - stime
-        urls = len(result["urls"])
-        urls_per_second = int(urls / duration)
-
-        print(
-            "{0:d} urls in {1:0.2f}s ({2:d}/s) CPU: {3:0.2f}s".format(
-                urls, duration, urls_per_second, cputime
-            )
-        )
-
-if __name__ == "__main__":
-    main()
+__all__ = ("crawl", "fetch_url", "get_links",)

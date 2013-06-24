@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Module:   extractor
+# Date:     18th December 2012
+# Author:   James Mills, j dot mills at griffith dot edu dot au
 
 """Web Extraction Tool"""
 
@@ -12,9 +15,10 @@ from collections import defaultdict
 from multiprocessing.pool import ThreadPool
 from optparse import OptionGroup, OptionParser
 
+from lxml.html import tostring as doc_to_str
+
 from . import __version__
-from . import extract, log
-from .utils import dict_to_text
+from .utils import dict_to_text, doc_to_text, fetch_url, is_url, log, parse_html
 
 try:
     from calais import Calais
@@ -108,6 +112,21 @@ def parse_options():
             raise SystemExit(1)
 
     return opts, args
+
+
+def extract(source, filters):
+    filters = dict(filter.split("=") for filter in filters)
+    s = fetch_url(source)[1] if is_url(source) else open(source, "r").read()
+    doc = parse_html(s)
+
+    result = {}
+    for k, v in filters.items():
+        e = (doc.cssselect(v) or [None])[0]
+        html = doc_to_str(e) if e is not None else ""
+        text = doc_to_text(e) if e is not None else ""
+        result["_{0:s}".format(k)] = html
+        result[k] = text
+    return result
 
 
 def job(opts, source):

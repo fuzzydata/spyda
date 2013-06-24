@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 
+import imp
 from glob import glob
 
 from setuptools import setup, find_packages
 
-exec(compile(open("spyda/_version.py").read(), "spyda/_version.py", 'exec'))
+
+version = imp.new_module("version")
+exec compile(open("spyda/version.py", "r").read(), "spyda/version.py", "exec") in version.__dict__
+
 
 setup(
     name="spyda",
-    version=__version__,
+    version=".".join(version.version_info),
     description="Spyda - Python Spider Tool and Library",
     long_description="{0:s}\n\n{1:s}".format(
         open("README.rst").read(), open("RELEASE.rst").read()
