@@ -31,7 +31,8 @@ VERSION = "%prog v" + __version__
 DESCRIPTION = (
     "Tool to extract fragments of a given document by use of CSS Selector(s). "
     "Specify each input filter using the -f/--filter option as a key/value pair. "
-    "Example: -f \"title=.title\" "
+    "Example 1: -f \"key=.element\" or -f title=#title)"
+    "Example 2: -f \"key.attr=.element\" or -f title.alt=#title"
     "If - is provided as the only argument, then for each line of standard output "
     "(assumed to be a url) and the -o/--output option, extraction of each url "
     "will be processed and dumped to the given output path."
@@ -124,8 +125,15 @@ def extract(source, filters):
         e = (doc.cssselect(v) or [None])[0]
         html = doc_to_str(e) if e is not None else ""
         text = doc_to_text(e) if e is not None else ""
-        result["_{0:s}".format(k)] = html
-        result[k] = text
+        if "." in k:
+            k, attr_k = k.split(".")
+            if hasattr(e, 'attrib'):
+                result[k] = e.attrib[attr_k]
+            else:
+                result[k] = ""
+        else:    
+            result["_{0:s}".format(k)] = html
+            result[k] = text
     return result
 
 
