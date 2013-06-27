@@ -38,6 +38,7 @@ To build the docs:
 To run the unit tests:
 
 - `pytest <https://pypi.python.org/pypi/pytest>`_
+- `circuits <https://pypi.python.org/pypi/circuits>`_
 
 
 Supported Platforms
