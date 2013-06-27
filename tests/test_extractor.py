@@ -27,16 +27,18 @@ def sample_url_index(request, webapp):
 
 @pytest.fixture()
 def filters(request):
-    return ["title=#article .title", "content=#article #content"]
+    return ["title=#article .title", "content=#article #content", "img.src=img"]
 
 
 @pytest.fixture()
 def expected_result(request):
     return {
-        "title": "Test Article",
-        "_title": """<p class="title">Test Article</p>\n""",
-        "content": "James Mills says \"Hello World!\"",
-        "_content": """<div id="content">\n<p>James Mills says "Hello World!"</p>\n</div>\n""",
+        "title": ["Test Article"],
+        "_title": ["<p class=\"title\">Test Article</p>\n"],
+        "content": ["James Mills says \"Hello World!\""],
+        "_content": ["""<div id="content">\n<p>James Mills says "Hello World!"</p>\n<img alt="Test Img1" src="http://www.testsite.com/img1.jpg">\n<img alt="Test Img2" src="http://www.testsite.com/img2.jpg">\n</div>\n"""],
+        "img": ["http://www.testsite.com/img1.jpg", "http://www.testsite.com/img2.jpg"],
+        "_img": ["http://www.testsite.com/img1.jpg", "http://www.testsite.com/img2.jpg"],
     }
 
 
@@ -47,7 +49,7 @@ def test_extract_file(sample_file, filters, expected_result):
 
 def test_extract_file_null(sample_file):
     filters = ("foo=bar",)
-    expected_result = {"foo": "", "_foo": ""}
+    expected_result = {"foo": [], "_foo": []}
 
     result = extract(sample_file, filters)
     assert result == expected_result
