@@ -28,19 +28,19 @@ def test_crawl(webapp, expected_links):
 
 def test_crawl_allowed_urls(webapp):
     result = crawl(urljoin(webapp.server.base, "external"), blacklist=[".*"], allowed_urls=["^http\:\/\/localhost.*"])
-    assert not result["urls"]
+    assert result["urls"] == ["http://www.google.com/"]
     assert not result["errors"]
 
 
 def test_crawl_blacklist(webapp):
     result = crawl(webapp.server.base, blacklist=[".*"])
-    assert not result["urls"]
+    assert set(result["urls"]) == set([urljoin(webapp.server.base, x) for x in ("foo/", "asdf/",)])
     assert not result["errors"]
 
 
 def test_crawl_whitelist(webapp):
     result = crawl(urljoin(webapp.server.base, "external"), blacklist=[".*"], allowed_urls=["^http\:\/\/localhost.*"])
-    assert not result["urls"]
+    assert result["urls"] == ["http://www.google.com/"]
     assert not result["errors"]
 
 

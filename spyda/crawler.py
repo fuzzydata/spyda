@@ -136,6 +136,13 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
                     verbose and log("  (V): {0}", _url)
                     continue
 
+                if patterns and not any((regex.match(_url) is not None) for regex in patterns):
+                    verbose and log("  (P): {0}", _url)
+                else:
+                    verbose and log("  (F): {0}", _url)
+                    urls.append(_url)
+                    l += 1
+
                 if blacklist and any((regex.match(_url) is not None) for regex in blacklist):
                     if whitelist and any((regex.match(_url) is not None) for regex in whitelist):
                         queue.append(url)
@@ -143,16 +150,9 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
                     else:
                         visited.append(_url)
                         verbose and log("  (B): {0}", _url)
-                        continue
                 else:
                     queue.append(url)
 
-                if patterns and not any((regex.match(_url) is not None) for regex in patterns):
-                    verbose and log("  (P): {0}", _url)
-                else:
-                    verbose and log("  (F): {0}", _url)
-                    urls.append(_url)
-                    l += 1
             not verbose and status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
         except Exception as e:  # pragma: no cover
             error(e)
