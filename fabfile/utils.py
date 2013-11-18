@@ -7,6 +7,8 @@
 from functools import wraps
 from imp import find_module
 from contextlib import contextmanager
+from os.path import abspath, expanduser, expandvars
+
 
 from fabric.api import abort, hide, local, puts, quiet, settings, warn
 
@@ -39,13 +41,11 @@ def msg(s):
 def pip(*args, **kwargs):
     requirements = kwargs.get("requirements", None)
     if requirements is not None:
-        with settings(hide("stdout", "stderr")):
-            local("pip install -r {0:s}".format(kwargs["requirements"]))
+        local("pip install -U -r {0:s}".format(kwargs["requirements"]))
     else:
         args = list(arg for arg in args if not has_module(arg))
         if args:
-            with settings(hide("stdout", "stderr")):
-                local("pip install {0:s}".format(" ".join(args)))
+            local("pip install {0:s}".format(" ".join(args)))
 
 
 def has_module(name):
@@ -58,6 +58,10 @@ def has_module(name):
 def has_binary(name):
     with quiet():
         return local("which {0:s}".format(name)).succeeded
+
+
+def resolvepath(p):
+    return abspath(expandvars(expanduser(p)))
 
 
 def requires(*names, **kwargs):

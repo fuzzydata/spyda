@@ -1,0 +1,5 @@
+recursive-include spyda *
+recursive-include docs *
+recursive-include tests *
+recursive-include fabfile *
+include LICENSE *.ini *.rst *.sh

@@ -41,13 +41,12 @@ setup(
         "https://bitbucket.org/prologic/calais/get/tip.zip#egg=calais-dev"
     ],
     install_requires=[
-        "url",
-        "lxml",
-        "nltk",
-        "calais",
-        "cssselect",
-        "restclient",
-        "BeautifulSoup"
+        "BeautifulSoup==3.2.1",
+        "cssselect==0.8",
+        "lxml==3.2.1",
+        "nltk==2.0.4",
+        "restclient==0.11.0",
+        "url==0.1.0",
     ],
     entry_points={
         "console_scripts": [
