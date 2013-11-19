@@ -5,11 +5,14 @@ nltk==2.0.4
 restclient==0.11.0
 url==0.1.0
 -e hg+https://bitbucket.org/prologic/calais#egg=calais-dev
+Fabric==1.8.0
 circuits==2.1.0
-Sphinx
-Sphinx-PyPI-upload
-sphinxcontrib-bitbucket
-sphinxcontrib-programoutput
-sphinxcontrib-googleanalytics
-pytest==2.3.5
+pudb==2013.3.6
 tox==1.6.1
+pytest==2.4.2
+pytest-cov==1.6
+Sphinx==1.1.3
+Sphinx-PyPI-upload==0.2.1
+sphinxcontrib-bitbucket==1.0
+sphinxcontrib-googleanalytics==0.1
+sphinxcontrib-programoutput==0.8

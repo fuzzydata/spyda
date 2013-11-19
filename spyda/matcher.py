@@ -11,8 +11,7 @@ from optparse import OptionParser
 from multiprocessing.pool import Pool
 
 from . import __version__
-from . import fetch_url, log
-from .utils import is_url, get_close_matches
+from .utils import fetch_url, is_url, get_close_matches, log
 
 USAGE = "%prog [options] [ data | url ] [ sources ]"
 VERSION = "%prog v" + __version__

@@ -1,59 +1,36 @@
-.. spyda documentation master file, created by
-   sphinx-quickstart on Wed Apr  3 13:41:27 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-==============================
+=============================
 spyda |version| Documentation
-==============================
+=============================
 
 
 :Release: |release|
 :Date: |today|
 
 
-README
-======
+About
+=====
+
+.. include:: ../../README.rst
 
 
-.. toctree::
-   :maxdepth: 1
-
-   readme
+.. _documentation-index:
 
 
-Contents
-========
-
+Documentation
+=============
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
+   api/index
+   todo
+   roadmap
    changes
-
-
-.. toctree::
-   :hidden:
-
-   glossary
-
-.. ifconfig:: devel
-
-   .. toctree::
-      :hidden:
-
-      todo
 
 
 Indices and tables
 ==================
 
-
-* :ref:`Index <genindex>`
+* :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-* :doc:`glossary`
-
-.. ifconfig:: devel
-
-   * :doc:`todo`

@@ -14,8 +14,8 @@ def importable(module):
         return False
 
 
-def runtests():
-    cmd = ["py.test", "-r", "fsxX", "--ignore=tmp"]
+def main():
+    cmd = ["py.test", "-s", "-r", "fsxXE", "--ignore=tmp", "--durations=10"]
 
     if importable("pytest_cov"):
         cmd.append("--cov=spyda")
@@ -25,5 +25,6 @@ def runtests():
 
     raise SystemExit(Popen(cmd, stdout=sys.stdout, stderr=STDOUT).wait())
 
+
 if __name__ == "__main__":
-    runtests()
+    main()

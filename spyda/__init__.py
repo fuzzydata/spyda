@@ -15,5 +15,4 @@ for web crawling, article extraction entity matching and rdf graog geberatuib.
 __author__ = "James Mills, j dot mills at griffith dot edu dot au"
 __date__ = "9th January 2013"
 
-from version import version_info
-__version__ = version = ".".join(version_info)
+from .version import version as __version__  # noqa

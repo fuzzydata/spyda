@@ -1,26 +1,31 @@
 #!/usr/bin/env python
 
-import imp
 from glob import glob
+from os import getcwd, path
+from imp import new_module
 
 from setuptools import setup, find_packages
 
 
-version = imp.new_module("version")
-exec compile(open("spyda/version.py", "r").read(), "spyda/version.py", "exec") in version.__dict__
+version = new_module("version")
+
+exec(
+    compile(open(path.join(path.dirname(globals().get("__file__", path.join(getcwd(), "spyda"))), "spyda/version.py"), "r").read(), "spyda/version.py", "exec"),
+    version.__dict__
+)
 
 
 setup(
     name="spyda",
-    version=".".join(version.version_info),
+    version=version.version,
     description="Spyda - Python Spider Tool and Library",
     long_description="{0:s}\n\n{1:s}".format(
-        open("README.rst").read(), open("RELEASE.rst").read()
+        open("README.rst").read(), open("CHANGES.rst").read()
     ),
     author="James Mills",
     author_email="James Mills, j dot mills at griffith dot edu dot au",
     url="https://bitbucket.org/prologic/spyda",
-    download_url="https://bitbucket.org/prologic/spyda/downloads/get/tip.zip",
+    download_url="https://bitbucket.org/prologic/spyda/downloads/",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
@@ -36,7 +41,7 @@ setup(
     keywords="Python Spider Web Crawling and Extraction Tool and Library",
     platforms="POSIX",
     packages=find_packages("."),
-    scripts=glob("scripts/*"),
+    scripts=glob("bin/*"),
     dependency_links=[
         "https://bitbucket.org/prologic/calais/get/tip.zip#egg=calais-dev"
     ],
@@ -55,6 +60,6 @@ setup(
             "match=spyda.matcher:main"
         ]
     },
-    zip_safe=False,
-    test_suite="tests.main.runtests",
+    test_suite="tests.main.main",
+    zip_safe=True
 )

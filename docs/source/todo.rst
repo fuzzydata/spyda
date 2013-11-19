@@ -1,5 +1,1 @@
-Documentation TODO
-==================
-
-
-.. todolist::
+.. include:: ../../TODO.rst
