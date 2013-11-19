@@ -7,6 +7,7 @@
 .. _nltk: https://pypi.python.org/pypi/nltk
 .. _calais: https://bitbucket.org/prologic/calais
 .. _BeautifulSoup: https://pypi.python.org/pypi/BeautifulSoup
+.. _Griffith University: http://www.griffith.edu.au/
 
 
 Overview
@@ -15,6 +16,9 @@ Overview
 spyda is a simple tool and library written in the `Python Programming Language`_ to crawl a given url whilst allowing you to restrict results to a specified
 domain and optionally also perform pattern matching against URLs crawled. spyda will report on any URLs it was unable to crawl along with their status code
 and store successfully crawled links and their content in a directory structure that matches the domain and URLs searched.
+
+spyda was developed at `Griffith University`_ as a tool and library to assist with web crawling tasks and data extraction and has been used to help
+match researcher names against publications as well as extract data and links from external sources of data.
 
 
 Requirements
