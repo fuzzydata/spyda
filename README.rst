@@ -13,8 +13,8 @@ Overview
 --------
 
 spyda is a simple tool and library written in the `Python Programming Language`_ to crawl a given url whilst allowing you to restrict results to a specified
-domain and optionally also perform pattern matching against urls crawled. spyda will report on any urls it was unable to crawl along with their status code
-and store successfully cralwed links and their content in a directory structure that matches the domain and urls searched.
+domain and optionally also perform pattern matching against URLs crawled. spyda will report on any URLs it was unable to crawl along with their status code
+and store successfully crawled links and their content in a directory structure that matches the domain and URLs searched.
 
 
 Requirements
@@ -28,7 +28,7 @@ Requirements
 - `calais`_
 - `BeautifulSoup`_
 
-spyda also comes basic documentation and a full cimprehensive unit test suite which require the following:
+spyda also comes basic documentation and a full comprehensive unit test suite which require the following:
 
 To build the docs:
 
