@@ -1,5 +1,5 @@
 # Package:  version
-# Date:     24th June 2013
+# Date:     12th October 2013
 # Author:   James Mills, j dot mills at griffith dot edu dot au
 
 """Version Module
@@ -7,4 +7,5 @@
 So we only have to maintain version information in one place!
 """
 
-version_info = ("0", "0", "3", "dev")
+version_info = (0, 0, 1, "dev")  # (major, minor, patch, dev?)
+version = ".".join(map(str, version_info))

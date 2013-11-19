@@ -1,7 +1,5 @@
-spyda-0.0.2 yyyymmdd
---------------------
+spyda-0.0.1.dev
+---------------
 
 
-- Added basic sphinx docs
-- Improved packaging
-- Improved testing
+- Initial Release
