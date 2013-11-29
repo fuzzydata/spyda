@@ -37,6 +37,10 @@ match researcher names against publications as well as extract data and links fr
    :target: https://jenkins.shiningpanda-ci.com/prologic/job/spyda/
    :alt: Build Status
 
+.. image:: https://requires.io/bitbucket/prologic/spyda/requirements.png?branch=default
+   :target: https://requires.io/bitbucket/prologic/spyda/requirements/?branch=default
+   :alt: Requirements Status
+
 
 Requirements
 ------------
