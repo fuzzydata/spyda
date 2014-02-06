@@ -62,6 +62,7 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
      - (F) (F)ound a valid URL
      - (S) (S)een this URL before
      - (E) (E)rror fetching URL
+     - (P) Did not match supplied (P)attern(s).
      - (V) URL already (V)isitied
      - (B) URL blacklisted
      - (W) URL whitelisted
