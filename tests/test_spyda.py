@@ -46,14 +46,14 @@ def sample_links():
     return SAMPLE_LINKS
 
 
-def test_fetch_url(webapp):
-    res, data = fetch_url(urljoin(webapp.server.base, "hello"))
+def test_fetch_url(baseurl):
+    res, data = fetch_url(urljoin(baseurl, "hello"))
     assert res.status == 200
     assert data == b"Hello World!"
 
 
-def test_fetch_url_unicode(webapp):
-    res, data = fetch_url(urljoin(webapp.server.base, "unicode"))
+def test_fetch_url_unicode(baseurl):
+    res, data = fetch_url(urljoin(baseurl, "unicode"))
     assert res.status == 200
     assert data == u"Hello World!"
 

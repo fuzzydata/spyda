@@ -105,3 +105,8 @@ def webapp(request, manager, watcher):
     assert watcher.wait("ready", webapp.channel)
 
     return webapp
+
+
+@pytest.fixture(scope="session")
+def baseurl(request, webapp):
+    return webapp.server.http.base

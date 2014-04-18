@@ -12,22 +12,29 @@ from .helpers import urljoin
 @pytest.fixture()
 def sample_file(request):
     root = path.dirname(__file__)
-    return path.relpath(path.join(root, "docroot", "sample.html"), path.join(path.dirname(__file__), ".."))
+    return path.relpath(
+        path.join(root, "docroot", "sample.html"),
+        path.join(path.dirname(__file__), "..")
+    )
 
 
 @pytest.fixture()
-def sample_url(request, webapp):
-    return urljoin(webapp.server.base, "sample.html")
+def sample_url(request, baseurl):
+    return urljoin(baseurl, "sample.html")
 
 
 @pytest.fixture()
-def sample_url_index(request, webapp):
-    return urljoin(webapp.server.base, "sample/")
+def sample_url_index(request, baseurl):
+    return urljoin(baseurl, "sample/")
 
 
 @pytest.fixture()
 def filters(request):
-    return ["title=#article .title", "content=#article #content", "img.src=img"]
+    return [
+        "title=#article .title",
+        "content=#article #content",
+        "img.src=img"
+    ]
 
 
 @pytest.fixture()
@@ -36,9 +43,9 @@ def expected_result(request):
         "title": ["Test Article"],
         "_title": ["<p class=\"title\">Test Article</p>\n"],
         "content": ["James Mills says \"Hello World!\""],
-        "_content": ["""<div id="content">\n<p>James Mills says "Hello World!"</p>\n<img alt="Test Img1" src="http://www.testsite.com/img1.jpg">\n<img alt="Test Img2" src="http://www.testsite.com/img2.jpg">\n</div>\n"""],
-        "img": ["http://www.testsite.com/img1.jpg", "http://www.testsite.com/img2.jpg"],
-        "_img": ["http://www.testsite.com/img1.jpg", "http://www.testsite.com/img2.jpg"],
+        "_content": ["""<div id="content">\n<p>James Mills says "Hello World!"</p>\n<img alt="Test Img1" src="http://www.testsite.com/img1.jpg">\n<img alt="Test Img2" src="http://www.testsite.com/img2.jpg">\n</div>\n"""],  # noqa
+        "img": ["http://www.testsite.com/img1.jpg", "http://www.testsite.com/img2.jpg"],  # noqa
+        "_img": ["http://www.testsite.com/img1.jpg", "http://www.testsite.com/img2.jpg"],  # noqa
     }
 
 
