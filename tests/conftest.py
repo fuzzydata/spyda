@@ -10,7 +10,7 @@ from os import path
 from time import sleep
 from collections import deque
 
-from circuits.net.sockets import Close
+from circuits.net.events import close
 from circuits.web import Controller, Server, Static
 from circuits import handler, BaseComponent, Component, Debugger, Manager
 
@@ -97,7 +97,7 @@ def webapp(request, manager, watcher):
     webapp = WebApp().register(manager)
 
     def finalizer():
-        webapp.fire(Close(), webapp.server)
+        webapp.fire(close(), webapp.server)
         webapp.stop()
 
     request.addfinalizer(finalizer)
