@@ -2,7 +2,9 @@
 # Date:     18th December 2012
 # Author:   James Mills, j dot mills at griffith dot edu dot au
 
+
 """Utilities"""
+
 
 import re
 import sys
@@ -11,10 +13,12 @@ from heapq import nlargest
 from traceback import format_exc
 from difflib import SequenceMatcher
 
+
 from restclient import GET
 from nltk import clean_html as html_to_text
 from lxml.html import tostring as doc_to_str
 from lxml.html.soupparser import fromstring as html_to_doc
+
 
 from . import __version__
 

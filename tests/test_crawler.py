@@ -47,7 +47,7 @@ def test_crawl_blacklist(baseurl):
     result = crawl(baseurl, blacklist=[".*"])
 
     assert set(result["urls"]) == set(
-        [urljoin(baseurl, x) for x in ("foo/", "asdf/",)]
+        [urljoin(baseurl, x) for x in ("download.tar.gz", "foo/", "asdf/",)]
     )
 
     assert not result["errors"]
@@ -69,7 +69,7 @@ def test_crawl_max_depth(baseurl):
     assert not result["errors"]
     assert sorted(result["urls"]) == list(
         x.format(baseurl)
-        for x in ("{0:s}/asdf/", "{0:s}/foo/")
+        for x in ("{0:s}/asdf/", "{0:s}/download.tar.gz", "{0:s}/foo/")
     )
 
 

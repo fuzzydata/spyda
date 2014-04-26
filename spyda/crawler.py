@@ -3,62 +3,83 @@
 # Date:     18th December 2012
 # Author:   James Mills, j dot mills at griffith dot edu dot au
 
+
 """Crawler"""
+
 
 import sys
 from warnings import warn
 from time import clock, time
-from optparse import OptionParser
-
 from collections import deque
+from optparse import OptionParser
 from re import compile as compile_regex
 
+
+from requests import head
 from url import parse as parse_url
+
 
 from . import __version__
 from .utils import error, fetch_url, get_links, log, status
 
+
 USAGE = "%prog [options] <url>"
 VERSION = "%prog v" + __version__
 
+
+CONTENT_TYPES = ["text/html", "text/xml"]
 
 HEADERS = {
     "User-Agent": "{0} v{1}".format(__name__, __version__)
 }
 
 
-def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=None, verbose=False, whitelist=None):
+def crawl(root_url, allowed_urls=None, blacklist=None,
+          content_types=CONTENT_TYPES, max_depth=0,
+          patterns=None, verbose=False, whitelist=None):
     """Crawl a given url recursively for urls.
 
-    :param root_url: Root URL to start crawling from.
-    :type  root_url: str
+    :param root_url:      Root URL to start crawling from.
+    :type  root_url:      str
 
-    :param allowed_urls: A list of allowed urls (matched by regex) to traverse.
-                         By default a regex is compiled for the ``root_url`` and used.
-    :type  allowed_urls: list or None
+    :param allowed_urls:  A list of allowed urls (matched by regex) to
+                          traverse.  By default a regex is compiled for
+                          the ``root_url`` and used.
+    :type  allowed_urls:  list or None
 
-    :param blacklist: A list of blacklisted urls (matched by regex) to not traverse.
-    :type  blacklist: list or None
+    :param blacklist:     A list of blacklisted urls (matched by regex)
+                          to not traverse.
+    :type  blacklist:     list or None
 
-    :param max_depth: Maximum depth to follow, 0 for unlimited depth.
-    :param max_depth: int
+    :param content_types: A list of allowable content types to follow.
+    :type  content_types: list or CONTENT_TYPES
 
-    :param patterns: A list of regex patterns to match urls against. If evaluates to ``False``, matches all urls.
-    :type  patterns: list or None or False
+    :param max_depth:     Maximum depth to follow, 0 for unlimited depth.
+    :param max_depth:     int
 
-    :param verbose: If ``True`` will print verbose logging
-    :param verbose: bool
+    :param patterns:      A list of regex patterns to match urls against.
+                          If evaluates to ``False``, matches all urls.
+    :type  patterns:      list or None or False
 
-    :param whitelist: A list of whitelisted urls (matched by regex) to traverse.
-    :type  whitelist: list or None
+    :param verbose:       If ``True`` will print verbose logging
+    :param verbose:       bool
 
-    :returns: A dict in the form {"error": set(...), "urls": set(...)}
-              The errors set contains 2-item tuples of (status, url)
-              The urls set contains 2-item tuples of (rel_url, abs_url)
-    :rtype: dict
+    :param whitelist:     A list of whitelisted urls (matched by regex)
+                          to traverse.
+    :type  whitelist:     list or None
 
-    In verbose mode the following single-character letters are used to denonate meaning for URLs being processed:
+    :returns:             A dict in the form:
+                          {"error": set(...), "urls": set(...)}
+                          The errors set contains 2-item tuples
+                          of (status, url)
+                          The urls set contains 2-item tuples of
+                          (rel_url,abs_url)
+    :rtype:               dict
+
+    In verbose mode the following single-character letters are used
+    to denonate meaning for URLs being processed:
      - (I) (I)nvalid URL
+     - (C) Did not match allowed (C)ontent Type(s).
      - (F) (F)ound a valid URL
      - (S) (S)een this URL before
      - (E) (E)rror fetching URL
@@ -69,17 +90,18 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
 
     Also in verbose mode each followed URL is printed in the form:
     <status> <reason> <type> <length> <link> <url>
-
-    .. deprecated:: 0.0.2
-       The ``allowed_url`` parameter has been deprecated in favor of two additional parameters
-       ``blacklist`` and ``whitelist``.
-
-    .. versionadded:: 0.0.2
-       ``blacklist`` and ``whitelist`` control a regex matched pattern of urls to traverse.
     """
 
-    blacklist = [compile_regex(regex) for regex in blacklist] if blacklist else []
-    patterns = [compile_regex(regex) for regex in patterns] if patterns else []
+    blacklist = [
+        compile_regex(regex)
+        for regex in blacklist] if blacklist else [
+    ]
+
+    patterns = [
+        compile_regex(regex)
+        for regex in patterns] if patterns else [
+    ]
+
     root_url = parse_url(root_url)
     queue = deque([root_url])
     visited = []
@@ -88,13 +110,13 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
     n = 0
     l = 0
 
-    # XXX: Remove this block in spyda>0.0.2
-    if allowed_urls:
-        warn("The use of the ``allowed_urls`` parameter is deprecated. Please use ``whitelist`` instead.", category=DeprecationWarning)
-        if whitelist:
-            whitelist.extend(allowed_urls)
+    if whitelist:
+        whitelist.extend(allowed_urls)
 
-    whitelist = [compile_regex(regex) for regex in whitelist] if whitelist else []
+    whitelist = [
+        compile_regex(regex)
+        for regex in whitelist] if whitelist else [
+    ]
 
     while queue:
         try:
@@ -137,24 +159,53 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
                     verbose and log("  (V): {0}", _url)
                     continue
 
-                if patterns and not any((regex.match(_url) is not None) for regex in patterns):
+                if patterns and not any(
+                        (regex.match(_url) is not None)
+                        for regex in patterns
+                        ):
                     verbose and log("  (P): {0}", _url)
                 else:
                     verbose and log("  (F): {0}", _url)
                     urls.append(_url)
                     l += 1
 
-                if blacklist and any((regex.match(_url) is not None) for regex in blacklist):
-                    if whitelist and any((regex.match(_url) is not None) for regex in whitelist):
-                        queue.append(url)
-                        verbose and log("  (W): {0}", _url)
+                response = head(_url)
+                try:
+                    response.raise_for_status()
+                    content_type = response.headers.get("Content-Type", None)
+                except:
+                    content_type = None
+
+                if blacklist and any((
+                        regex.match(_url) is not None)
+                        for regex in blacklist
+                        ):
+                    if whitelist and any(
+                            (regex.match(_url) is not None)
+                            for regex in whitelist
+                            ):
+                        if content_type is None or (
+                                content_type and content_type in content_types
+                                ):
+                            queue.append(url)
+                            verbose and log("  (W): {0}", _url)
+                        else:
+                            verbose and log("  (C): {0}", _url)
                     else:
                         visited.append(_url)
                         verbose and log("  (B): {0}", _url)
                 else:
-                    queue.append(url)
+                    if content_type is None or (
+                            content_type and content_type in content_types
+                            ):
+                        queue.append(url)
+                    else:
+                        verbose and log("  (C): {0}", _url)
 
-            not verbose and status("Q: {0:d} F: {1:d} V: {2:d} L: {3:d}", len(queue), n, len(visited), l)
+            not verbose and status(
+                "Q: {0:d} F: {1:d} V: {2:d} L: {3:d}",
+                len(queue), n, len(visited), l
+            )
         except Exception as e:  # pragma: no cover
             error(e)
         except KeyboardInterrupt:  # pragma: no cover
@@ -168,13 +219,6 @@ def crawl(root_url, allowed_urls=None, blacklist=None, max_depth=0, patterns=Non
 
 def parse_options():
     parser = OptionParser(usage=USAGE, version=VERSION)
-
-    # XXX: Remove this block in spyda>0.0.2
-    parser.add_option(
-        "-a", "--allowed_url",
-        action="append", default=None, dest="allowed_urls",
-        help="(@deprecated) Allowed url to traverse (multiple allowed)."
-    )
 
     parser.add_option(
         "-b", "--blacklist",
@@ -195,6 +239,12 @@ def parse_options():
     )
 
     parser.add_option(
+        "-t", "--contenttype",
+        action="append", default=CONTENT_TYPES, dest="content_types",
+        help="Content Type(s) to follow (multiple allowed)."
+    )
+
+    parser.add_option(
         "-v", "--verbose",
         action="store_true", default=False, dest="verbose",
         help="Enable verbose logging"
@@ -211,10 +261,6 @@ def parse_options():
     if len(args) < 1:
         parser.print_help()
         raise SystemExit(1)
-
-    # XXX: Remove this block in spyda>0.0.2
-    if opts.allowed_urls:
-        warn("The use of the ``-a/--allowed_url`` option is deprecated. Please use ``-w/--whitelist`` instead.", category=DeprecationWarning)
 
     return opts, args
 
