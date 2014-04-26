@@ -2,6 +2,7 @@
 # Date:     18th June 2013
 # Author:   James Mills, j dot mills at griffith dot edu dot au
 
+
 """Development Tasks"""
 
 
@@ -10,7 +11,8 @@ from __future__ import print_function
 from os import getcwd
 
 
-from fabric.api import abort, cd, execute, hide, hosts, local, prefix, prompt, run, settings, task
+from fabric.api import abort, cd, execute, hide, hosts
+from fabric.api import local, prefix, prompt, run, settings, task
 
 
 import help  # noqa
@@ -23,7 +25,8 @@ from .utils import msg, pip, requires, tobool
 def build(**options):
     """Build and install required dependencies
 
-    Options can be provided to customize the build. The following options are supported:
+    Options can be provided to customize the build.
+    The following options are supported:
 
     - dev -> Whether to install in development mode (Default: Fase)
     """
@@ -64,6 +67,29 @@ def test():
     """Run all unit tests and doctests."""
 
     local("python setup.py test")
+
+
+@task()
+@requires("docker")
+def docker(**options):
+    """Build and Publish Docker Image
+
+    Options can be provided to customize the build.
+    The following options are supported:
+
+    - rebuild -> Whether to rebuild without a cache.
+    """
+
+    rebuild = tobool(options.get("rebuild", False))
+
+    with msg("Building Image"):
+        if rebuild:
+            local("docker build -t prologic/spyda --no-cache .")
+        else:
+            local("docker build -t prologic/spyda .")
+
+    with msg("Pushing Image"):
+        local("docker push  prologic/spyda")
 
 
 @task()
@@ -114,7 +140,12 @@ def sync(*args):
 
     status = local("hg status", capture=True)
     if status:
-        abort("Repository is not in a clean state! Please commit, revert or shelve!")
+        abort(
+            (
+                "Repository is not in a clean state! "
+                "Please commit, revert or shelve!"
+            )
+        )
 
     with settings(warn_only=True):
         local("hg fetch")
