@@ -3,6 +3,9 @@
 FROM prologic/crux-python
 MAINTAINER James Mills <prologic@shortcircuitnet.au>
 
+# Install dependencies
+RUN prt-get depinst libxslt
+
 # Add Source
 ADD . /usr/src/spyda
 
