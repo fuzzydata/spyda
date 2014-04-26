@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+
 from glob import glob
 from os import getcwd, path
 from imp import new_module
+
 
 from setuptools import setup, find_packages
 
@@ -10,7 +12,21 @@ from setuptools import setup, find_packages
 version = new_module("version")
 
 exec(
-    compile(open(path.join(path.dirname(globals().get("__file__", path.join(getcwd(), "spyda"))), "spyda/version.py"), "r").read(), "spyda/version.py", "exec"),
+    compile(
+        open(
+            path.join(
+                path.dirname(
+                    globals().get(
+                        "__file__", path.join(getcwd(), "spyda")
+                    )
+                ),
+                "spyda/version.py"
+            ),
+            "r"
+        ).read(),
+        "spyda/version.py",
+        "exec"
+    ),
     version.__dict__
 )
 
@@ -46,12 +62,13 @@ setup(
         "https://bitbucket.org/prologic/calais/get/tip.zip#egg=calais-dev"
     ],
     install_requires=[
-        "BeautifulSoup==3.2.1",
-        "cssselect==0.8",
+        "url==0.1.0",
         "lxml==3.2.1",
         "nltk==2.0.4",
+        "cssselect==0.8",
+        "requests==2.2.1",
         "restclient==0.11.0",
-        "url==0.1.0",
+        "BeautifulSoup==3.2.1",
     ],
     entry_points={
         "console_scripts": [

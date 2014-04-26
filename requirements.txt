@@ -1,7 +1,8 @@
-BeautifulSoup==3.2.1
-cssselect==0.8
+url==0.1.0
 lxml==3.2.1
 nltk==2.0.4
+cssselect==0.8
+requests==2.2.1
 restclient==0.11.0
-url==0.1.0
+BeautifulSoup==3.2.1
 -e hg+https://bitbucket.org/prologic/calais#egg=calais-dev
